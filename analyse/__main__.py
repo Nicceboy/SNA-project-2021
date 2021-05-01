@@ -53,7 +53,7 @@ def sort_users(
     )
     for index, key in enumerate(list(users_sorted.keys())[:amount_to_show]):
         GLOBAL_LOGGER.info(
-            f"User {index + 1}: {by_meta_value}, {users_sorted[key][by_meta_value]}"
+            f"User {index + 1} ({key}): {by_meta_value}, {users_sorted[key][by_meta_value]}"
         )
     return users_sorted
 
