@@ -1,45 +1,14 @@
 #!/usr/bin/env python3
+import re
 import csv
-import networkx
+import networkx as nx
 import pathlib
-import datetime
 import logging
 import argparse
 import sys
+import matplotlib.pyplot as plt
 from typing import Union, List
-
-
-class TweetData:
-    """Class representing single row from the .csv data set"""
-
-    def __init__(
-        self,
-        row_id: int,
-        name: str,
-        username: str,
-        description: str,
-        location: str,
-        followers: int,
-        number_statuses: int,
-        time: datetime.datetime,
-        tweet: str,
-    ):
-        self.row_id: int = row_id
-        self.name: str = name
-        self.username: str = username
-        self.description: str = description
-        self.location: str = location
-        self.followers: int = int(followers)
-        self.number_statuses: int = int(number_statuses)
-        if time:
-            self.time: datetime.datetime = self.format_str_time(time)
-        self.tweet: str = tweet
-
-    def format_str_time(self, time: str) -> datetime.datetime:
-        """Convert string time to datetime object
-        Example date: month/day/year 1/6/2015 21:07
-        """
-        return datetime.datetime.strptime(time, "%m/%d/%Y %H:%M")
+from .tweetdata import TweetData
 
 
 def read_csv_into_obj(path: pathlib) -> List[TweetData]:
@@ -54,7 +23,8 @@ def read_csv_into_obj(path: pathlib) -> List[TweetData]:
             tweets.append(TweetData(*row))
             if not tweets[index - 1].username and not tweets[index - 1].tweet:
                 GLOBAL_LOGGER.debug(f"Invalid data on row {tweets[index - 1].row_id}")
-    GLOBAL_LOGGER.info("CSV file loaded.")
+    GLOBAL_LOGGER.info(f"CSV file loaded from the path '{str(path)}'.")
+    GLOBAL_LOGGER.info(f"{len(tweets)} tweets found.")
     return tweets
 
 
@@ -67,6 +37,11 @@ def main():
             f"CSV dataset not found from the path {DATA_PATH}. Please, download and convert it."
         )
     data = read_csv_into_obj(DATA_PATH)
+
+    G = nx.Graph()
+
+    for tweet in data:
+        G.add_node(tweet.username, obj=data)
 
 
 if __name__ == "__main__":

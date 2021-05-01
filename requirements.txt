@@ -2,3 +2,6 @@ networkx
 pandas
 openpyxl # .xlxs parser
 black # code formatter
+matplotlib
+vaderSentiment
+pytest

@@ -57,3 +57,21 @@ pip install -r requirements.txt
 ```console
 python -c 'import pandas;data_xlsx = pandas.read_excel("data/isis_twitter_data.xlsx", "Sheet1", dtype=str, index_col=None, engine="openpyxl"); data_xlsx.to_csv("data/isis_twitter_data.csv", encoding="utf-8", index=True)'
 ```
+
+### Usage
+
+Currently main function code can be run as:
+
+```console
+python -m analyse
+```
+
+## Tests
+
+Some tests are applied to ensure that data is extracted correctly.
+
+To execute tests:
+
+```console
+pytest -v tests/test_tweetdata.py
+```
