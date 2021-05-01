@@ -30,3 +30,12 @@ This project aims to investigate the social network of ISIS Twitter network publ
   11. Draw heat map of degree centrality distribution for each value of the threshold . [see examples of heat maps in https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0220061
   
   12. Comment on the results using identified literature in security and terrorism of your choice.
+
+
+### Download Excel data
+
+```console
+mkdir -p data && \
+curl -o data/isis_twitter_data.xlsx -L "https://onedrive.live.com/download?resid=6EC6B09373B309D7\!1172&
+ithint=file%2cxlsx&authkey=AJqrs7Zl1XKyJd0"
+```
