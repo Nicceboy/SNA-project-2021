@@ -78,6 +78,7 @@ class TweetData:
 
     @property
     def sentiment(self) -> Sentiment:
+        """Get sentiment of tweet, by using vaderSentiment tool"""
         if not self._sentiment:
             # Not provided, calculate it for this tweet
             analyzer = SentimentIntensityAnalyzer()

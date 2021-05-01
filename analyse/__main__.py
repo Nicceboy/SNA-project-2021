@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from typing import Union, List, Dict
 from .tweetdata import TweetData
 from copy import deepcopy
+from operator import itemgetter
 
 USER_META = {
     "amount_tweets": 0,
@@ -37,6 +38,26 @@ def read_csv_into_obj(path: pathlib) -> List[TweetData]:
     return tweets
 
 
+def sort_users(
+    users: Dict, by_meta_value: str = "amount_tweets", amount_to_show: int = 10
+) -> Dict:
+
+    if by_meta_value not in USER_META.keys():
+        raise ValueError("Key used for sorting must be found from Dict 'USER_META'")
+
+    users_sorted = dict(
+        sorted(users.items(), key=lambda item: item[1][by_meta_value], reverse=True)
+    )
+    GLOBAL_LOGGER.info(
+        f"Users sorted by {by_meta_value}, showing first {amount_to_show} users:"
+    )
+    for index, key in enumerate(list(users_sorted.keys())[:amount_to_show]):
+        GLOBAL_LOGGER.info(
+            f"User {index + 1}: {by_meta_value}, {users_sorted[key][by_meta_value]}"
+        )
+    return users_sorted
+
+
 def group_users_by_tweet_meta(data: List[TweetData]) -> Dict:
     users = {}
     for tweet in data:
@@ -47,6 +68,10 @@ def group_users_by_tweet_meta(data: List[TweetData]) -> Dict:
         users[tweet.username]["amount_mentions"] += len(tweet.get_mentions())
         users[tweet.username]["amount_hashtags"] += len(tweet.get_hashtags())
         users[tweet.username]["tweets"].append(tweet)
+
+    GLOBAL_LOGGER.info(
+        f"Total of {len(users)} different users with meta data constructed from original data."
+    )
     return users
 
 
@@ -60,9 +85,11 @@ def main():
         )
     data = read_csv_into_obj(DATA_PATH)
 
-    # users = group_users_by_tweet_meta(data)
+    users = group_users_by_tweet_meta(data)
+    users_sorted = sort_users(users)
+
     # data[0].sentiment()
-    print(data[0].sentiment)
+    # print(data[0].sentiment)
     # for tweet in data:
     #     G.add_node(tweet.username, obj=data)
 
