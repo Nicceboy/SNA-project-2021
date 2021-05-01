@@ -39,3 +39,17 @@ mkdir -p data && \
 curl -o data/isis_twitter_data.xlsx -L "https://onedrive.live.com/download?resid=6EC6B09373B309D7\!1172&
 ithint=file%2cxlsx&authkey=AJqrs7Zl1XKyJd0"
 ```
+
+## Init Python environment (Linux)
+
+```console
+python -m venv venv && \
+source venv/bin/activate && \
+pip install -r requirements.txt
+```
+
+## Inline conversion from .xlsx to .csv
+
+```console
+python -c 'import pandas;data_xlsx = pandas.read_excel("data/isis_twitter_data.xlsx", "Sheet1", dtype=str, index_col=None, engine="openpyxl"); data_xlsx.to_csv("data/isis_twitter_data.csv", encoding="utf-8", index=True)'
+```
