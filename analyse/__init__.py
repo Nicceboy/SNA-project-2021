@@ -1,3 +1,3 @@
-from .tweetdata import TweetData
+from .tweetdata import TweetData, Sentiment
 
-__all__ = ["TweetData"]
+__all__ = ["TweetData", "Sentiment"]

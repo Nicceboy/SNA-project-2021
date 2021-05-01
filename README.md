@@ -73,5 +73,5 @@ Some tests are applied to ensure that data is extracted correctly.
 To execute tests:
 
 ```console
-pytest -v tests/test_tweetdata.py
+pytest -v tests
 ```

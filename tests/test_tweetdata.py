@@ -2,7 +2,7 @@ import pytest
 import pathlib
 import logging
 import analyse
-from analyse import TweetData
+from analyse import TweetData, Sentiment
 from analyse.__main__ import read_csv_into_obj
 
 DATA_PATH = pathlib.Path("data/isis_twitter_data.csv")
@@ -57,3 +57,28 @@ def test_retweets(tweet_subset):
 
     assert not tweet_subset[36].is_retweet()
     assert tweet_subset[63].is_retweet()
+
+
+def test_sentiment_types(tweet_subset):
+    """Test sentiment types"""
+    sample = tweet_subset[0]
+
+    sample.sentiment = "NEUTRAL"
+    with pytest.raises(ValueError):
+        sample.sentiment = "NEUTRALL"
+    assert sample.sentiment == Sentiment.NEUTRAL
+    sample.sentiment = Sentiment.NEUTRAL
+    assert sample.sentiment == Sentiment.NEUTRAL
+    sample.sentiment = "POSITIVE"
+    assert sample.sentiment == Sentiment.POSITIVE
+    sample.sentiment = "NEGATIVE"
+    assert sample.sentiment == Sentiment.NEGATIVE
+
+
+def test_sentiment_values(tweet_subset):
+
+    assert tweet_subset[0].sentiment == Sentiment.POSITIVE
+    assert tweet_subset[1].sentiment == Sentiment.POSITIVE
+    assert tweet_subset[2].sentiment == Sentiment.NEUTRAL
+    assert tweet_subset[3].sentiment == Sentiment.POSITIVE
+    assert tweet_subset[4].sentiment == Sentiment.NEGATIVE

@@ -7,8 +7,17 @@ import logging
 import argparse
 import sys
 import matplotlib.pyplot as plt
-from typing import Union, List
+from typing import Union, List, Dict
 from .tweetdata import TweetData
+from copy import deepcopy
+
+USER_META = {
+    "amount_tweets": 0,
+    "amount_retweets": 0,
+    "amount_mentions": 0,
+    "amount_hashtags": 0,
+    "tweets": [],
+}
 
 
 def read_csv_into_obj(path: pathlib) -> List[TweetData]:
@@ -28,6 +37,19 @@ def read_csv_into_obj(path: pathlib) -> List[TweetData]:
     return tweets
 
 
+def group_users_by_tweet_meta(data: List[TweetData]) -> Dict:
+    users = {}
+    for tweet in data:
+        if tweet.username not in users:
+            users[tweet.username] = deepcopy(USER_META)
+        users[tweet.username]["amount_tweets"] += 1
+        users[tweet.username]["amount_retweets"] += 1 if tweet.is_retweet() else 0
+        users[tweet.username]["amount_mentions"] += len(tweet.get_mentions())
+        users[tweet.username]["amount_hashtags"] += len(tweet.get_hashtags())
+        users[tweet.username]["tweets"].append(tweet)
+    return users
+
+
 def main():
 
     DATA_PATH = pathlib.Path("data/isis_twitter_data.csv")
@@ -38,10 +60,11 @@ def main():
         )
     data = read_csv_into_obj(DATA_PATH)
 
-    G = nx.Graph()
-
-    for tweet in data:
-        G.add_node(tweet.username, obj=data)
+    # users = group_users_by_tweet_meta(data)
+    # data[0].sentiment()
+    print(data[0].sentiment)
+    # for tweet in data:
+    #     G.add_node(tweet.username, obj=data)
 
 
 if __name__ == "__main__":
