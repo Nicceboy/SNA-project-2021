@@ -32,7 +32,9 @@ This project aims to investigate the social network of ISIS Twitter network publ
   12. Comment on the results using identified literature in security and terrorism of your choice.
 
 
-### Download Excel data
+### Download Excel data (Linux)
+
+Data is in `data` folder and excluded from version control.
 
 ```console
 mkdir -p data && \
@@ -41,6 +43,8 @@ ithint=file%2cxlsx&authkey=AJqrs7Zl1XKyJd0"
 ```
 
 ### Init Python environment (Linux)
+
+Python 3.9.3 version initially used, lower versions might be applicable.
 
 ```console
 python -m venv venv && \
