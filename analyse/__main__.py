@@ -55,6 +55,11 @@ def sort_users(
         GLOBAL_LOGGER.info(
             f"User {index + 1} ({key}): {by_meta_value}, {users_sorted[key][by_meta_value]}"
         )
+    # Something weird going on if these are not equal
+    assert len(users_sorted[next(iter(users_sorted))].get("tweets")) == users_sorted[
+        next(iter(users_sorted))
+    ].get("amount_tweets")
+
     return users_sorted
 
 
