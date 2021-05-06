@@ -1,4 +1,4 @@
-# SNA-project-2021
+# SNA 2021 - ISIS Twitter Network analysis
 
 The project work for Social Network Analysis, iteration for year 2021
 

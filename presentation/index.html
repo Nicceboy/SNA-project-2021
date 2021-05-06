@@ -32,11 +32,11 @@
 			<section data-markdown data-background-image="../img/network-3849202_1920.jpg"
 				data-background-opacity="0.3">
 				<textarea data-template>
-				## Me?
+				## Project Members - Me?
 
-				 Seems like sole loner in this project
+				 I code a lot.
 
-				 Very technical person, let’s see how the writing goes
+				 Let’s see how the writing goes...
 
 				
 				</textarea>
@@ -62,7 +62,7 @@
 				<textarea data-template>
 				## Project Background
 
-				<p class="fragment">Public social networks grow -> attention by extremist or radical organizations and individuals who try to influence other people.</p>
+				<p class="fragment">Public social networks grow -> attention by extremist or radical organizations and individuals raises who try to influence other people.</p>
 				<p class="fragment">They often disseminate  their  ideologies  and  destructive  plans while trying to acquire new members.</p>
 				<p class="fragment">As these organizations are often violent and radical hate groups, some approaches could be implemented to detect members, possibly to prevent spreading of propaganda and hateful ideologies to even prevent war between peaceful societies.</p>
 				</textarea>
@@ -82,10 +82,14 @@
 					data-background-opacity="0.3">
 					Big social network companies are at some level applying content moderation, to make sure that people
 					are
-					applying into their terms of use (ToS). We don't want hate speech, violence, etc. don't we?
+					applying into their terms of use (ToS).
+
+					We don't want hate speech, inciting to violence, etc. don't
+					we?
 					* Currently they are not hold responsible for applying content moderation in many countries, but
-					still many are applying it
-					* How automate it at some level and find root causes?
+					still many are applying it (luckily).
+					* How to automate it at some level and find root causes? Of course, there are concerns for
+					free-speech but we have should have find methods for identifying radical parts.
 				</section>
 				<section data-markdown data-background-image="../img/network-3849202_1920.jpg"
 					data-background-opacity="0.3">Intelligence services to prevent terrorism
@@ -130,7 +134,7 @@
 				<textarea data-template>
 			## What it holds
 
-			Data columns per tweet as following:
+			Data content per tweet as following:
 			* Name
 			* Username (Twitter ID)
 			* Description
@@ -143,6 +147,62 @@
 			</textarea>
 			</section>
 
+			<section data-markdown data-background-image="../img/network-3849202_1920.jpg"
+				data-background-opacity="0.3">
+				<textarea data-template>
+				## What we could learn from this specific data?
+
+				<p class="fragment">Who are the major players in the ISIS Twitter Network? E.g. who has the most influence power and how they behave?</p>
+				<p class="fragment">Sentiment analysis for the content of the tweet; is it negative, neutral or positive and in which context.</p>
+				<p class="fragment">Which keywords are mostly used? E.g. hashtags and how they are connected</p>
+				<p class="fragment">Are the spikes in the tweets on certain time?</p>
+				<p class="fragment">Are location related to tweets or time? Or something else?</p>
+				</textarea>
+			</section>
+
+
+			<section data-markdown data-background-image="../img/network-3849202_1920.jpg"
+				data-background-opacity="0.3">
+				<textarea data-template>
+			## Limitations for this specific assignment
+
+			Base on the given assignment, the scope is limited into
+
+			* Tweet data amount analysis - power law?
+			* Analysis based on mentions, retweets or hashtags
+			* Identify users with the most usage, analyse relationships
+			* Use VADER tool for identifying tweet sentiment (NEGATIVE, NEUTRAL, POSITIVE)
+
+			</textarea>
+			</section>
+
+			<section>
+				<section data-markdown data-background-image="../img/network-3849202_1920.jpg"
+					data-background-opacity="0.3">
+					<textarea data-template>
+				## Initial work
+				
+				Data has been successfully parsed to get required information parts.
+
+				Test cases constructed for validating that implemented code methods work.
+
+				Using `pytest` framework to validate, that #hashtags, @mentions, RT retweets and VADER sentiments have been correctly identified from sample data; cases are manually validated.
+
+				</textarea>
+				</section>
+				<section data-background-image="../img/network-3849202_1920.jpg" data-background-opacity="0.3">
+					<h2> Initial analysis</h2>
+					<p class="fragment">The amount of tweets per user:</p>
+					<img class="fragment" data-src="../img/Figure_1_tweets_by_user.png">
+
+					<p class="fragment">Strongly suggest following the power law. Let's scale with logarithm.</p>
+				</section>
+				<section data-background-image="../img/network-3849202_1920.jpg" data-background-opacity="0.3">
+					<img data-src="../img/Figure_2_tweets_by_user_logarithmic.png">
+
+					<p class="fragment">Seems to descent "almost" linearly.</p>
+				</section>
+			</section>
 		</div>
 	</div>
 
