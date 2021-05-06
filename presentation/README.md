@@ -2,7 +2,7 @@
 
 Presentation has been done by using tool [Reveal.](https://revealjs.com/)
 
-It is HTML presentation framework. To get our [index.html](render), download basic dependencies for framework as:
+It is HTML presentation framework. To get our [index.html](index.html) rendered, download basic dependencies for framework as:
 
 ```console
 curl -OL https://github.com/hakimel/reveal.js/archive/master.zip && '
