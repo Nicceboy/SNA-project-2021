@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import re
+from sklearn.preprocessing import minmax_scale
 import csv
 import networkx as nx
 import pathlib
@@ -9,6 +10,7 @@ import sys
 import matplotlib
 import pandas
 import plotly.express as px
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # matplotlib.use("Qt5Agg")
 matplotlib.use("TkAgg")
@@ -18,7 +20,6 @@ from .tweetdata import TweetData, Sentiment
 from copy import deepcopy
 from operator import itemgetter
 from itertools import islice
-
 
 USER_META = {
     "amount_tweets": 0,
@@ -47,9 +48,8 @@ def read_csv_into_obj(path: pathlib) -> List[TweetData]:
 
 
 def sort_users(
-    users: Dict, by_meta_value: str = "amount_tweets", amount_to_show: int = 10
+        users: Dict, by_meta_value: str = "amount_tweets", amount_to_show: int = 10
 ) -> Dict:
-
     if by_meta_value not in USER_META.keys():
         raise ValueError("Key used for sorting must be found from Dict 'USER_META'")
 
@@ -72,12 +72,12 @@ def sort_users(
 
 
 def plot(
-    labels: List[str],
-    data: List[int],
-    x_label: str = "",
-    y_label: str = "",
-    description: str = "",
-    plot_type: str = "bar",
+        labels: List[str],
+        data: List[int],
+        x_label: str = "",
+        y_label: str = "",
+        description: str = "",
+        plot_type: str = "bar",
 ):
     # fig = plt.figure()
     # ax = fig.add_axes([0, 0, 1, 1])
@@ -97,13 +97,13 @@ def plot(
 
 
 def plot_users(
-    users: Dict,
-    plot_by: str = "amount_tweets",
-    x_label: str = "",
-    y_label: str = "",
-    description: str = "",
-    use_name: bool = False,
-    plot_type: str = "bar",
+        users: Dict,
+        plot_by: str = "amount_tweets",
+        x_label: str = "",
+        y_label: str = "",
+        description: str = "",
+        use_name: bool = False,
+        plot_type: str = "bar",
 ):
     if plot_by not in USER_META.keys():
         raise ValueError("Key used for plotting must be found from Dict 'USER_META'")
@@ -114,6 +114,39 @@ def plot_users(
         names = range(0, len(users.keys()))
     num = [users.get(k).get(plot_by) for k in users.keys()]
     plot(names, num, x_label, y_label, description, plot_type)
+
+
+def plot_sentiments_with_ternary(tweets: List[TweetData]):
+    # draw ternary plot
+    negative_count = []
+    neutral_count = []
+    positive_count = []
+    # This is really slow to instance, need to define outside of tweet class
+    analyser = SentimentIntensityAnalyzer()
+    sentiments = {
+        "NEGATIVE": [],
+        "NEUTRAL": [],
+        "POSITIVE": [],
+    }
+    for tweet in tweets:
+        sentiment = tweet.set_sentiment_value(analyser)
+        if sentiment is Sentiment.NEGATIVE:
+            negative_count.append(tweet.sentiment_value)
+        elif sentiment is Sentiment.POSITIVE:
+            positive_count.append(tweet.sentiment_value)
+        elif sentiment is Sentiment.NEUTRAL:
+            neutral_count.append(tweet.sentiment_value)
+        sentiments["NEGATIVE"].append(tweet.sentiment_value.get("neg"))
+        sentiments["NEUTRAL"].append(tweet.sentiment_value.get("neu"))
+        sentiments["POSITIVE"].append(tweet.sentiment_value.get("pos"))
+
+    GLOBAL_LOGGER.debug("Sentiment calculation done.")
+    GLOBAL_LOGGER.info(f"Length of negative: {len(negative_count)}")
+    GLOBAL_LOGGER.info(f"Length of neutral: {len(neutral_count)}")
+    GLOBAL_LOGGER.info(f"Length of positive: {len(positive_count)}")
+    df = pandas.DataFrame(sentiments)
+    fig = px.scatter_ternary(df, b="NEGATIVE", a="NEUTRAL", c="POSITIVE")
+    fig.show()
 
 
 def group_users_by_tweet_meta(data: List[TweetData]) -> Dict:
@@ -151,7 +184,6 @@ def get_slice(data: Dict, n: int = 10) -> Dict:
 
 
 def main():
-
     DATA_PATH = pathlib.Path("data/isis_twitter_data.csv")
 
     if not DATA_PATH.is_file():
@@ -186,69 +218,36 @@ def main():
             plot_type="log",
         )
     users_sorted_10 = get_slice(users_sorted)
-    # plot_users(
-    #     users_sorted_10,
-    #     "amount_tweets",
-    #     "User number",
-    #     "Amount tweets",
-    #     "Amount of tweets per user, sorted as descending",
-    #     use_name=True,
-    # )
-    # assert 10 == len(users_sorted_10.keys())
-    # for sort_by, desc in zip(
-    #     list(USER_META.keys())[1:],
-    #     ["Amount retweets", "Amount use of mentions", "Amount use of hashtags"],
-    # ):
-    #     users_sorted = sort_users(users, by_meta_value=sort_by)
-    #     users_sorted_10 = get_slice(users_sorted)
-    #     plot_users(
-    #         users_sorted_10,
-    #         sort_by,
-    #         "User number",
-    #         desc,
-    #         f"{desc} per user, sorted as descending",
-    #         use_name=True,
-    #     )
-    # data[0].sentiment()
-    # print(data[0].sentiment)
-    # G = nx.Graph()
-    # draw ternary plot
-    negative = []
-    neutral = []
-    positive = []
-    for tweet in data:
-        sentiment = tweet.sentiment
-        if sentiment is Sentiment.NEGATIVE:
-            negative.append(tweet.sentiment_value)
-        elif sentiment is Sentiment.POSITIVE:
-            positive.append(tweet.sentiment_value)
-        elif sentiment is Sentiment.NEUTRAL:
-            neutral.append(tweet.sentiment_value)
-        else:
-            GLOBAL_LOGGER.error("Invalid sentiment value")
-    GLOBAL_LOGGER.info("Sentiment calculation done.")
-    GLOBAL_LOGGER.info(f"Length of negative: {len(negative)}")
-    GLOBAL_LOGGER.info(f"Length of neutral: {len(neutral)}")
-    GLOBAL_LOGGER.info(f"Length of positive: {len(positive)}")
-    # In [38]:
-    # l1 = list('abc')
-    # l2 = [1,2,3,4]
-    # s1 = pd.Series(l1, name='list1')
-    # s2 = pd.Series(l2, name='list2')
-    # df = pd.concat([s1,s2], axis=1)
-    # df
+    plot_top_ten_stats = False
+    if plot_top_ten_stats:
+        plot_users(
+            users_sorted_10,
+            "amount_tweets",
+            "User number",
+            "Amount tweets",
+            "Amount of tweets per user, sorted as descending",
+            use_name=True,
+        )
+        assert 10 == len(users_sorted_10.keys())
+        for sort_by, desc in zip(
+                list(USER_META.keys())[1:],
+                ["Amount retweets", "Amount use of mentions", "Amount use of hashtags"],
+        ):
+            users_sorted = sort_users(users, by_meta_value=sort_by)
+            users_sorted_10 = get_slice(users_sorted)
+            plot_users(
+                users_sorted_10,
+                sort_by,
+                "User number",
+                desc,
+                f"{desc} per user, sorted as descending",
+                use_name=True,
+            )
 
-    # Out[38]:
-    #   list1  list2
-    # 0     a      1
-    # 1     b      2
-    # 2     c      3
-    # 3   NaN      4
-    data = {"NEGATIVE": negative, "POSITIVE": positive, "NEUTRAL": neutral}
-    df = pandas.DataFrame.from_dict(data, orient="index")
-    # df.transpose()
-    fig = px.scatter_ternary(df, a="NEGATIVE", b="POSITIVE", c="NEUTRAL")
-    fig.show()
+    GLOBAL_LOGGER.info("Plotting sentiments of all tweets...")
+    plot_sentiments_with_ternary(data)
+    # G = nx.Graph()
+
 
 
 if __name__ == "__main__":
@@ -264,7 +263,7 @@ if __name__ == "__main__":
         help="Set the logging level",
         default=None,
     )
-    if len(sys.argv) >= 1 and len(sys.argv) < 3:
+    if 1 <= len(sys.argv) < 3:
         args = parser.parse_args(args=sys.argv[1:])
     else:
         raise ValueError("Too many program arguments provided.")

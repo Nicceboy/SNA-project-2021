@@ -1,7 +1,7 @@
 import datetime
 import re
 from enum import Enum
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Optional
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
@@ -20,7 +20,7 @@ class Sentiment(Enum):
         if isinstance(compound, int) or isinstance(compound, float):
             if compound <= -0.05:
                 return cls(cls.NEGATIVE)
-            elif compound < 0.05 and compound > -0.05:
+            elif 0.05 > compound > -0.05:
                 return cls(cls.NEUTRAL)
             elif compound >= 0.05:
                 return cls(cls.POSITIVE)
@@ -33,16 +33,16 @@ class TweetData:
     """Class representing single row from the .csv data set"""
 
     def __init__(
-        self,
-        row_id: int,
-        name: str,
-        username: str,
-        description: str,
-        location: str,
-        followers: int,
-        number_statuses: int,
-        time: datetime.datetime,
-        tweet: str,
+            self,
+            row_id: int,
+            name: str,
+            username: str,
+            description: str,
+            location: str,
+            followers: int,
+            number_statuses: int,
+            time: datetime.datetime,
+            tweet: str,
     ):
         self.row_id: int = row_id
         self.name: str = name
@@ -56,7 +56,8 @@ class TweetData:
         else:
             self.time = None
         self.tweet: str = tweet
-        self._sentiment: Sentiment = None
+        self._sentiment: Optional[Sentiment] = None
+        self._sentiment_value: Dict = {}
 
     def __format_str_time(self, time: str) -> datetime.datetime:
         """Convert string time to datetime object
@@ -81,10 +82,7 @@ class TweetData:
         """Get sentiment of tweet, by using vaderSentiment tool"""
         if not self._sentiment:
             # Not provided, calculate it for this tweet
-            analyzer = SentimentIntensityAnalyzer()
-            vs = analyzer.polarity_scores(self.tweet)
-            self._sentiment_value = vs.get("compound")
-            self._sentiment = Sentiment(vs)
+            raise ValueError("You must use 'set_sentiment_value' method at first.")
         return self._sentiment
 
     @sentiment.setter
@@ -94,12 +92,12 @@ class TweetData:
         self._sentiment = Sentiment(value)
 
     @property
-    def sentiment_value(self) -> Sentiment:
-        """Get sentiment of tweet, by using vaderSentiment tool"""
-        if not self._sentiment_value:
-            # Not provided, calculate it for this tweet
-            analyzer = SentimentIntensityAnalyzer()
-            vs = analyzer.polarity_scores(self.tweet)
-            self._sentiment_value = vs.get("compound")
-
+    def sentiment_value(self) -> Dict:
         return self._sentiment_value
+
+    def set_sentiment_value(self, analyzer: SentimentIntensityAnalyzer) -> Sentiment:
+        """Get sentiment of tweet, by using vaderSentiment tool"""
+        vs = analyzer.polarity_scores(self.tweet)
+        self._sentiment_value = vs
+        self._sentiment = Sentiment(vs)
+        return self._sentiment
