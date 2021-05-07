@@ -34,7 +34,7 @@
 				<textarea data-template>
 				## Project Members - Me?
 
-				 I code a lot.
+				 I like coding.
 
 				 Let’s see how the writing goes...
 
@@ -172,7 +172,8 @@
 			* Analysis based on mentions, retweets or hashtags
 			* Identify users with the most usage, analyse relationships
 			* Use VADER tool for identifying tweet sentiment (NEGATIVE, NEUTRAL, POSITIVE)
-
+			* Build social network from hashtags, summarize its properties, generate communities form the network by using Girvan-Newman algorithm
+			* For above, is it possible to connect follower amounts for these communities? Reduce the amount size of graph and plot relevant attribute values.
 			</textarea>
 			</section>
 
@@ -202,6 +203,61 @@
 
 					<p class="fragment">Seems to descent "almost" linearly.</p>
 				</section>
+				<section data-background-image="../img/network-3849202_1920.jpg" data-background-opacity="0.3">
+					<p>Let's see the partial names of top 10 users by Tweets</p>
+					<img data-src="../img/Figure_3_tweets_by_user_top10.png">
+
+
+				</section>
+				<section data-background-image="../img/network-3849202_1920.jpg" data-background-opacity="0.3">
+					<p>Let's see the partial names of top 10 users by retweets</p>
+					<img data-src="../img/Figure_4_retweets_by_top10.png">
+
+
+				</section>
+				<section data-background-image="../img/network-3849202_1920.jpg" data-background-opacity="0.3">
+					<p>Top 10 users by the use of mentions</p>
+					<img data-src="../img/Figure_5_mentions_by_top10.png">
+
+
+				</section>
+				<section data-background-image="../img/network-3849202_1920.jpg" data-background-opacity="0.3">
+					<p>Top 10 users by the use of hashtags</p>
+					<img data-src="../img/Figure_6_hastags_by_top10.png">
+
+
+				</section>
+				<section data-markdown data-background-image="../img/network-3849202_1920.jpg"
+					data-background-opacity="0.3">
+					<textarea data-template>
+					## Distribution of VADER sentiments
+
+					Amount of negative tweets: 6948
+
+					Amount of neutral tweets: 6657
+
+					Amount of positive tweets: 3805
+
+					Ternary plots work in progress...
+
+				</textarea>
+
+				</section>
+			</section>
+			<section data-markdown data-background-image="../img/network-3849202_1920.jpg"
+				data-background-opacity="0.3">
+				<textarea data-template>
+			## What next?
+
+			Probably the biggest work ahead, still have to construct network from hashtags.
+
+			And should continue on writing..
+
+			Other requirements are probably close to met.
+
+			
+			</textarea>
+			</section>
 			</section>
 		</div>
 	</div>

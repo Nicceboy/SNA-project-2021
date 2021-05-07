@@ -83,6 +83,7 @@ class TweetData:
             # Not provided, calculate it for this tweet
             analyzer = SentimentIntensityAnalyzer()
             vs = analyzer.polarity_scores(self.tweet)
+            self._sentiment_value = vs.get("compound")
             self._sentiment = Sentiment(vs)
         return self._sentiment
 
@@ -91,3 +92,14 @@ class TweetData:
         if value not in Sentiment.__members__ and not isinstance(value, Sentiment):
             raise ValueError("Sentiment value must be POSITIVE, NEGATIVE or NEUTRAL")
         self._sentiment = Sentiment(value)
+
+    @property
+    def sentiment_value(self) -> Sentiment:
+        """Get sentiment of tweet, by using vaderSentiment tool"""
+        if not self._sentiment_value:
+            # Not provided, calculate it for this tweet
+            analyzer = SentimentIntensityAnalyzer()
+            vs = analyzer.polarity_scores(self.tweet)
+            self._sentiment_value = vs.get("compound")
+
+        return self._sentiment_value

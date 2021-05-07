@@ -7,12 +7,14 @@ import logging
 import argparse
 import sys
 import matplotlib
+import pandas
+import plotly.express as px
 
 # matplotlib.use("Qt5Agg")
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 from typing import Union, List, Dict
-from .tweetdata import TweetData
+from .tweetdata import TweetData, Sentiment
 from copy import deepcopy
 from operator import itemgetter
 from itertools import islice
@@ -88,7 +90,7 @@ def plot(
     # plt.x
     plt.ylabel(y_label)
     plt.title(description)
-    plt.tick_params("x",labelrotation=-45)
+    plt.tick_params("x", labelrotation=-45)
     # for tick in plt.get_xticklabels():
     #     tick.set_rotation(90)
     plt.show()
@@ -192,22 +194,61 @@ def main():
     #     "Amount of tweets per user, sorted as descending",
     #     use_name=True,
     # )
-    assert 10 == len(users_sorted_10.keys())
-    for sort_by, desc in zip(list(USER_META.keys())[1:], ["Amount retweets", "Amount use of mentions", "Amount use of hashtags"]):
-        users_sorted = sort_users(users, by_meta_value=sort_by)
-        users_sorted_10 = get_slice(users_sorted)
-        plot_users(
-            users_sorted_10,
-            sort_by,
-            "User number",
-            desc,
-            f"{desc} per user, sorted as descending",
-            use_name=True,
-        )
+    # assert 10 == len(users_sorted_10.keys())
+    # for sort_by, desc in zip(
+    #     list(USER_META.keys())[1:],
+    #     ["Amount retweets", "Amount use of mentions", "Amount use of hashtags"],
+    # ):
+    #     users_sorted = sort_users(users, by_meta_value=sort_by)
+    #     users_sorted_10 = get_slice(users_sorted)
+    #     plot_users(
+    #         users_sorted_10,
+    #         sort_by,
+    #         "User number",
+    #         desc,
+    #         f"{desc} per user, sorted as descending",
+    #         use_name=True,
+    #     )
     # data[0].sentiment()
     # print(data[0].sentiment)
-    # for tweet in data:
-    #     G.add_node(tweet.username, obj=data)
+    # G = nx.Graph()
+    # draw ternary plot
+    negative = []
+    neutral = []
+    positive = []
+    for tweet in data:
+        sentiment = tweet.sentiment
+        if sentiment is Sentiment.NEGATIVE:
+            negative.append(tweet.sentiment_value)
+        elif sentiment is Sentiment.POSITIVE:
+            positive.append(tweet.sentiment_value)
+        elif sentiment is Sentiment.NEUTRAL:
+            neutral.append(tweet.sentiment_value)
+        else:
+            GLOBAL_LOGGER.error("Invalid sentiment value")
+    GLOBAL_LOGGER.info("Sentiment calculation done.")
+    GLOBAL_LOGGER.info(f"Length of negative: {len(negative)}")
+    GLOBAL_LOGGER.info(f"Length of neutral: {len(neutral)}")
+    GLOBAL_LOGGER.info(f"Length of positive: {len(positive)}")
+    # In [38]:
+    # l1 = list('abc')
+    # l2 = [1,2,3,4]
+    # s1 = pd.Series(l1, name='list1')
+    # s2 = pd.Series(l2, name='list2')
+    # df = pd.concat([s1,s2], axis=1)
+    # df
+
+    # Out[38]:
+    #   list1  list2
+    # 0     a      1
+    # 1     b      2
+    # 2     c      3
+    # 3   NaN      4
+    data = {"NEGATIVE": negative, "POSITIVE": positive, "NEUTRAL": neutral}
+    df = pandas.DataFrame.from_dict(data, orient="index")
+    # df.transpose()
+    fig = px.scatter_ternary(df, a="NEGATIVE", b="POSITIVE", c="NEUTRAL")
+    fig.show()
 
 
 if __name__ == "__main__":
