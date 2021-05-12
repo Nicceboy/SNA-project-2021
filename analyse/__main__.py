@@ -183,7 +183,7 @@ def get_slice(data: Dict, n: int = 10) -> Dict:
     return dict(islice(data.items(), n))
 
 
-def main():
+def main(_args: argparse.Namespace):
     DATA_PATH = pathlib.Path("data/isis_twitter_data.csv")
 
     if not DATA_PATH.is_file():
@@ -199,8 +199,7 @@ def main():
     # assert 10 == len(users_sorted_10.keys())
 
     # Plot all users, by amount of tweets
-    plots_tweet_amount_all = False
-    if plots_tweet_amount_all:
+    if args.all and args.plot_tweets:
         plot_users(
             users_sorted,
             "amount_tweets",
@@ -218,8 +217,7 @@ def main():
             plot_type="log",
         )
     users_sorted_10 = get_slice(users_sorted)
-    plot_top_ten_stats = False
-    if plot_top_ten_stats:
+    if not args.all and args.plot_tweets:
         plot_users(
             users_sorted_10,
             "amount_tweets",
@@ -245,9 +243,10 @@ def main():
             )
 
     GLOBAL_LOGGER.info("Plotting sentiments of all tweets...")
-    plot_sentiments_with_ternary(data)
+    show_vader_ternary_plot = False
+    if show_vader_ternary_plot:
+        plot_sentiments_with_ternary(data)
     # G = nx.Graph()
-
 
 
 if __name__ == "__main__":
@@ -263,7 +262,21 @@ if __name__ == "__main__":
         help="Set the logging level",
         default=None,
     )
-    if 1 <= len(sys.argv) < 3:
+    parser.add_argument(
+        "-a",
+        "--all",
+        dest="all",
+        help="Provided when showcasing all of the user data. By default top10 used instead. "
+             "Some user specific data left out",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--plot-tweets",
+        dest="plot_tweets",
+        help="Plot tweets",
+        action="store_true"
+    )
+    if 1 <= len(sys.argv):
         args = parser.parse_args(args=sys.argv[1:])
     else:
         raise ValueError("Too many program arguments provided.")
@@ -278,4 +291,4 @@ if __name__ == "__main__":
 
     GLOBAL_LOGGER = logging.getLogger("main")
 
-    main()
+    main(args)
