@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import re
 from sklearn.preprocessing import minmax_scale
+import numpy as np
 import csv
 import networkx as nx
 import pathlib
@@ -12,14 +13,15 @@ import pandas
 import plotly.express as px
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-# matplotlib.use("Qt5Agg")
-matplotlib.use("TkAgg")
+matplotlib.use("Qt5Agg")
+# matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 from typing import Union, List, Dict
 from .tweetdata import TweetData, Sentiment
 from copy import deepcopy
 from operator import itemgetter
-from itertools import islice
+from itertools import islice, combinations
+from collections import deque
 
 USER_META = {
     "amount_tweets": 0,
@@ -244,9 +246,56 @@ def main(_args: argparse.Namespace):
 
     GLOBAL_LOGGER.info("Plotting sentiments of all tweets...")
     show_vader_ternary_plot = False
-    if show_vader_ternary_plot:
+    if show_vader_ternary_plot and args.all:
         plot_sentiments_with_ternary(data)
-    # G = nx.Graph()
+    elif show_vader_ternary_plot:
+        for k in list(USER_META.keys())[1:4]:
+            users_combined_10 = []
+            users_sorted_10 = get_slice(sort_users(users, k))
+            GLOBAL_LOGGER.info(f"Plotting ternary by {k}")
+            for j in users_sorted_10.keys():
+                users_combined_10 += users_sorted_10.get(j).get("tweets")
+            plot_sentiments_with_ternary(users_combined_10)
+    G = nx.Graph()
+
+    create_edge_network = True
+    # G = nx.petersen_graph()
+    #
+    # plt.subplot(121)
+    #
+    # nx.draw(G, with_labels=True, font_weight='bold')
+    #
+    # plt.subplot(122)
+    #
+    # nx.draw_shell(G, nlist=[range(5, 10), range(5)], with_labels=True, font_weight='bold')
+    # plt.show()
+    if create_edge_network:
+        for tweet in data:
+            hashtags = tweet.get_hashtags()
+            if hashtags:
+                # Remove possible duplicates
+                hashtags = set(hashtags)
+                # print(hashtags)
+                for tag in hashtags:
+                    G.add_node(tag)
+                if len(hashtags) > 1:
+                    # Make unique pairs from hashtags, marking connection between hashtag
+                    pairs = list(combinations(hashtags, 2))
+                    G.add_edges_from(pairs)
+        GLOBAL_LOGGER.debug("All nodes and edges added for hashtag graph")
+        GLOBAL_LOGGER.info(f"There are {G.number_of_nodes()} nodes (unique hashtags) and {G.number_of_edges()}"
+                           f" edges in the Graph")
+        degrees = [v for (node, v) in G.degree()]
+        degree_max = np.max(degrees)
+        degree_min = np.min(degrees)
+        GLOBAL_LOGGER.info(f"The maximum degree is {degree_max}")
+        GLOBAL_LOGGER.info(f"The minimum degree is {degree_min}")
+        GLOBAL_LOGGER.info(f"The average degree of the nodes is {np.mean(degrees):.1f}")
+        GLOBAL_LOGGER.info(f"The number of connected components is {nx.number_connected_components(G)}")
+
+
+        # nx.drawing.nx_pylab.draw_networkx_nodes(G)
+        # plt.show()
 
 
 if __name__ == "__main__":
