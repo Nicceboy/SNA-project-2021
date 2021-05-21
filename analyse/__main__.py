@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-import re
-from sklearn.preprocessing import minmax_scale
-import numpy as np
-import csv
-import networkx as nx
-import pathlib
-import logging
+# from sklearn.preprocessing import minmax_scale
 import argparse
+import csv
+import logging
+import pathlib
 import sys
+
 import matplotlib
+import networkx as nx
+import numpy as np
 import pandas
 import plotly.express as px
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -17,12 +17,10 @@ matplotlib.use("Qt5Agg")
 # matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import powerlaw
-from typing import Union, List, Dict
+from typing import List, Dict
 from .tweetdata import TweetData, Sentiment
 from copy import deepcopy
-from operator import itemgetter
 from itertools import islice, combinations
-from collections import deque
 
 USER_META = {
     "amount_tweets": 0,
@@ -81,6 +79,7 @@ def plot(
         y_label: str = "",
         description: str = "",
         plot_type: str = "bar",
+        show: bool = False
 ):
     # fig = plt.figure()
     # ax = fig.add_axes([0, 0, 1, 1])
@@ -102,22 +101,45 @@ def plot(
     # if tmp_fig:
     #     handles, labels = tmp_fig.get_legend_handles_labels()
     #     plt.legend(handles, labels, loc=3)
-    plt.savefig(f'{description.replace(" ", "")}.png', bbox_inches='tight')
-    plt.show()
+    if not description:
+        f_name = "default"
+    else:
+        f_name = description.replace(" ", "")
+    plt.savefig(f'{f_name}.png', bbox_inches='tight')
+    if show:
+        plt.show()
+    else:
+        plt.close()
 
 
 def plot_powerlaw(data, x_label):
     """Method for attempting to fit data into powerlaw"""
-    fit = powerlaw.Fit(data)
-    # fit.set_xlabel(x_label)
-    # fit.set_ylabel("p(X)")
-    fig2 = fit.plot_pdf(color='b', linewidth=2, label=r"Probability density")
-    fit.power_law.plot_pdf(color='b', linestyle='--', ax=fig2, )
-    fit.plot_ccdf(color='r', linewidth=2, ax=fig2)
-    fit.power_law.plot_ccdf(color='r', linestyle='--', ax=fig2, label=r"Cumulative distribution")
+    fit = powerlaw.Fit(data, discrete=True)
+    fit.distribution_compare('power_law', 'lognormal')
+    fig = fit.plot_ccdf(linewidth=3, label='Tweet Data')
+    fit.power_law.plot_ccdf(ax=fig, color='r', linestyle='--', label='Power law fit')
+    fit.truncated_power_law.plot_ccdf(ax=fig, color='y', linestyle='--', label='Truncated Power law fit')
+    fit.lognormal.plot_ccdf(ax=fig, color='g', linestyle='--', label='Lognormal fit')
+    fit.exponential.plot_ccdf(ax=fig, color='b', linestyle='--', label='Exponential fit')
+    ####
+    fig.set_ylabel(u"p(X≥x)")
+    # fig.set_xlabel("y")
+    handles, labels = fig.get_legend_handles_labels()
+    fig.legend(handles, labels, loc=3)
+    R, p = fit.distribution_compare('power_law', 'exponential', normalized_ratio=True)
+    GLOBAL_LOGGER.info(f"Comparing distribution fit: power law vs exponential: {R:.2f} vs {p:.2f}")
+    R, p = fit.distribution_compare('power_law', 'lognormal', normalized_ratio=True)
+    GLOBAL_LOGGER.info(f"Comparing distribution fit: power law vs lognormal: {R:.2f} vs {p:.2f}")
+    R, p = fit.distribution_compare('exponential', 'lognormal', normalized_ratio=True)
+    GLOBAL_LOGGER.info(f"Comparing distribution fit: exponential vs lognormal: {R:.2f} vs {p:.2f}")
+    R, p = fit.distribution_compare('power_law', 'truncated_power_law')
+    GLOBAL_LOGGER.info(f"Comparing distribution fit: power_law vs truncated_power_law: {R:.2f} vs {p:.2f}")
+    R, p = fit.distribution_compare('lognormal', 'truncated_power_law')
+    GLOBAL_LOGGER.info(f"Comparing distribution fit: lognormal vs truncated_power_law: {R:.2f} vs {p:.2f}")
     return fit
     # powerlaw.savefig
     # plt.show()
+
 
 def plot_users(
         users: Dict,
@@ -127,6 +149,7 @@ def plot_users(
         description: str = "",
         use_name: bool = False,
         plot_type: str = "bar",
+        show: bool = False
 ):
     if plot_by not in USER_META.keys():
         raise ValueError("Key used for plotting must be found from Dict 'USER_META'")
@@ -136,10 +159,10 @@ def plot_users(
     else:
         names = range(0, len(users.keys()))
     num = [users.get(k).get(plot_by) for k in users.keys()]
-    plot(names, num, x_label, y_label, description, plot_type)
+    plot(names, num, x_label, y_label, description, plot_type, show)
 
 
-def plot_sentiments_with_ternary(tweets: List[TweetData]):
+def plot_sentiments_with_ternary(tweets: List[TweetData], show: bool = False, group: str = ""):
     # draw ternary plot
     negative_count = []
     neutral_count = []
@@ -169,7 +192,12 @@ def plot_sentiments_with_ternary(tweets: List[TweetData]):
     GLOBAL_LOGGER.info(f"Length of positive: {len(positive_count)}")
     df = pandas.DataFrame(sentiments)
     fig = px.scatter_ternary(df, b="NEGATIVE", a="NEUTRAL", c="POSITIVE")
-    fig.show()
+    name = group if group else "all"
+    path = f"article/figures/sentiment_ternary_{name}.png"
+    GLOBAL_LOGGER.info(f"Writing ternary plot of sentiment analysis into path {path}")
+    fig.write_image(path)
+    if show:
+        fig.show()
 
 
 def group_users_by_tweet_meta(data: List[TweetData]) -> Dict:
@@ -236,8 +264,9 @@ def main(_args: argparse.Namespace):
             "amount_tweets",
             "Tweet Frequency",
             "p(X)",
-            "Amount of tweets fitted into probability density and cumulative distribution function",
+            # "Amount of tweets fitted into CCDF, compared to different distribution candidates",
             plot_type="log",
+            show=args.show
         )
     users_sorted_10 = get_slice(users_sorted)
     if not args.all and args.plot_tweets:
@@ -248,6 +277,7 @@ def main(_args: argparse.Namespace):
             "Amount tweets",
             "Amount of tweets per user, sorted as descending",
             use_name=True,
+            show=args.show
         )
         assert 10 == len(users_sorted_10.keys())
         for sort_by, desc in zip(
@@ -259,24 +289,24 @@ def main(_args: argparse.Namespace):
             plot_users(
                 users_sorted_10,
                 sort_by,
-                "User number",
+                "Username",
                 desc,
                 f"{desc} per user, sorted as descending",
                 use_name=True,
+                show=args.show
             )
 
     GLOBAL_LOGGER.info("Plotting sentiments of all tweets...")
-    show_vader_ternary_plot = False
-    if show_vader_ternary_plot and args.all:
-        plot_sentiments_with_ternary(data)
-    elif show_vader_ternary_plot:
+    if args.sentiment and args.all:
+        plot_sentiments_with_ternary(data, args.show)
+    elif args.sentiment:
         for k in list(USER_META.keys())[1:4]:
             users_combined_10 = []
             users_sorted_10 = get_slice(sort_users(users, k))
             GLOBAL_LOGGER.info(f"Plotting ternary by {k}")
             for j in users_sorted_10.keys():
                 users_combined_10 += users_sorted_10.get(j).get("tweets")
-            plot_sentiments_with_ternary(users_combined_10)
+            plot_sentiments_with_ternary(users_combined_10, args.show, k)
     G = nx.Graph()
 
     create_edge_network = True
@@ -354,9 +384,22 @@ if __name__ == "__main__":
         action="store_true"
     )
     parser.add_argument(
+        "-s",
+        "--show",
+        dest="show",
+        help="Additionally show plots on GUI instead only saving them as file.",
+        action="store_true"
+    )
+    parser.add_argument(
         "--plot-tweets",
         dest="plot_tweets",
         help="Plot tweets",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--sentiment",
+        dest="sentiment",
+        help="Make sentiment analysis for data.",
         action="store_true"
     )
     if 1 <= len(sys.argv):

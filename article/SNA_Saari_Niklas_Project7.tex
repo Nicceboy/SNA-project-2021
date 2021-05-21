@@ -9,7 +9,10 @@
 \usepackage{xcolor, soul}
 \sethlcolor{gray}
 \usepackage{url}
+\usepackage{caption}
+\captionsetup[table]{skip=3pt}
 \usepackage{cleveref}
+\usepackage{subfiles}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
@@ -50,6 +53,7 @@
 
 This project has been done alone.
 The original project from the given project list was 7 with the title of "Analysis of ISIS Twitter dataset".
+Project source code and also source code of this article can found from \href{https://github.com/Nicceboy/SNA-project-2021}
 
 \section{Introduction}\label{sec:introduction}
 
@@ -193,123 +197,25 @@ Matplotlib\cite{4160265} is the main library used for drawing the visible graphs
 
 Vader Sentiment\cite{Hutto_Gilbert_2014} tool has been used to identify sentiment of the every tweet on some occurrences.
 
+
 \section{Detailed methodology}\label{sec:detailed-methodology}
 
-This section is going through exact details of the process how data was handled and how results were finally obtained.
-Actual results are described later on the section~\ref{sec:results-and-discussion}.
-
-
-\subsection{Initial steps}
-
-To get started with the analysis our Twitter data, we are required to shape data suitable for our use case.
-This was briefly described in the section~\ref{sec:dataset-description} on "preprocessing" subsection.
-Data was converted into \textbf{.csv} format and loaded into program memory.
-
-Initially, specific Python class was designed to allow ease access for tweet data and feature extraction.
-UML diagram can be seen in the figure~\ref{fig:tweetdata_design}.
-This class has build-in methods for extracting specific features from the tweet data and it converts values to suitable data types e.g. time into build-in Python time object.
-Methods include extracting hashtags, mentions and identification is the tweet retweet, and evaluation of possible sentiment value of it.
-
-\begin{figure}
-    \includegraphics[scale=0.3]{figures/uml_tweetdata}
-    \caption{Designed class for storing and handling the Tweet data}
-    \label{fig:tweetdata_design}
-\end{figure}
-
-Sentiment analysis is used here to make mass analysis for all tweets to categorize every tweet for one of the NEGATIVE, NEUTRAL and POSITIVE semantic orientations.
-This is useful stat to generalize what kind message(s) individuals are tweeting.
-
-Individual Twitter users will be sorted and handled separately by using different metrics: by use of the retweets, mentions and use of hashtags.
-Also, sentiments among all the tweets will be evaluated.
-VADER (Valence  Aware  Dictionary  for  sEntiment  Reasoning) tool\cite{Hutto_Gilbert_2014} has been used for making the sentiment calculation.
-It was released in 2014 and has acquired fame from its efficiency and accuracy.
-By default, tool is producing four different values for provided input as results.
-Three of the values (pos, neu and neg) are pointing the portion of the three orientations, from range to 0 into 1, totalling to sum of 1.
-One is describing overall result (compound), which "is computed by summing the valence scores of each word in the lexicon, adjusted according to the rules, and then normalized to be between -1 (most extreme negative) and +1 (most extreme positive)."
-
-Therefore, sentiment orientation is finally defined by compound value as following:
-
-\begin{center}
-\begin{tabular}{ |c|c|c| }
- \hline
- score $\geq$ 0.05 & Positive sentiment \\
- \hline
- score $>$ -0.05 & Neutral sentiment \\
- \hline
- score $\leq$ -0.05 & Negative sentiment \\
- \hline
-\end{tabular}
-\end{center}
-
-This classification is implemented on the Sentiment enum in the figure~\ref{fig:tweetdata_design}.
-It is giving one of the three sentiment description for every tweet based on calculated compound value, automatically.
-
-Ternary plots are used to describe the results, as they often can give clear visual evidence which variable from the three is  thecontrolling one.
-During the assessment of class creation, it was observed that instancing SentimentIntensityAnalyzer from Vader tool is resource consuming, hence
-analyzer is instanced only once outside TweetData class and passed into object afterwards to significantly increase performance.
-
-
-After we have loaded the \textbf{.csv} file, it is parsed in a such a way that from each row in the data, new instance
-of TweetData object has been created and list form them is formed.
-Further, this list is processed in such a way, that every Twitter user is separated to be part of the new
-$<$username$>$:USER\_META dictionary object, which has following attributes; amount\_tweets, amount\_retweets, amount\_mentions, amount\_hashtags and all the tweets this user has tweeted.
-This gives us access by username for metadata and user-specific tweets.
-
-Some specific functions have been additionally created that previously created dictionary can be easily sorted, based on it's key-value attributes and finally plotted with suitable graphs.
-
-\subsection{Visualising interesting information}
-
-At this point we already have access for many interesting information.
-We can plot and sort users based on their amount of tweets, amount of retweets, amount of mentions and by the amount of hashtag usages.
-Matplotlib Python package has been used for this.
-
-We are also interested to know, whether power law is applying here, in the context of tweets by single user.
-Power law is known to be functional relationship between two quantities, where probability distributions are often "heavy-tailed".
-Pareto principle (80-20) is commonly used as rule to see if data fits under power law\cite{enwiki:1023956740}.
-
-Probability distribution of power law can be seen as
-
- \begin{equation}
- p(x) \propto x^{-\alpha}\label{eq:equation1}
- \end{equation}
-
-where $\alpha$ is a constant known usually as scaling parameter and \textit{x} as quantity.
-Quantity \textit{x} obeys the power law if it is drawn from this distribution.\cite{doi:10.1137/070710111}
-
-Following
-
-
-
-Power law
-
-\subsection{Degree Centrality}
-
-Degree centrality is the sum of in-degree and out-degree. 
-It is representing the amount of edges entering and leaving the nodes respectively. 
-The most important nodes have the most direct connections with others under degree centrality.
-The value can be computed as,
-
-\begin{equation*}\label{eq:degree-centrality}
-    C_{D}(v_{i})={\sum}_{j}A_{ij} \tag{1} 
-\end{equation*}
-
-\subsection{Betweeness Centrality}
-
-Betweeness centrality is another way to measure importance of nodes.
-It is describing the amount of the shortest path passing the node.
-Important nodes have high betweeness centrality, information is flowing through them, and they are connecting multiple nodes into the network.
-
-\begin{equation*}
-    C_{B}(v_{i})={\sum}_{v_{s}\neq v_{i}\neq v_{t}\in V,s < \text{t}}\frac{\sigma_{st}(v_{i})}{\sigma_{st}} \tag{2}
-\end{equation*}
+\subfile{detailed_methodology}
 
 \section{Results and Discussion}\label{sec:results-and-discussion}
 
 Initial dataset contained more than 17~000 tweets and 114 different users.
+Results of analysis are handled in this section.
+
+\subsection{Basic measurements}
+
 Distribution of the tweets per single user can be seen on the figure~\ref{fig:amount-tweets-user}.
 
-This data distribution seems to be quite "heavy-tailed" which is typical in power law theory, but for further clarification, it was fitted into probability distribution function.
+This data distribution seems to be "heavy-tailed" which is typical in power law theory, but for further clarification,
+it was fitted into Complementary Cumulative Distribution Function (CCDF) and compared into other candidate distributions.
 
+As seen in the figure \ref{fig:amount-tweets-user}, it is not so clear what is the closest suitable distribution.
+Yet this strongly suggests, that ISIS Twitter user behaviour follows the traditional clause "rich get richer", in terms of Twitter tweets.
 
 \begin{figure}
     \includegraphics[scale=0.6]{figures/amount_tweets_per_user}
@@ -317,6 +223,97 @@ This data distribution seems to be quite "heavy-tailed" which is typical in powe
     \label{fig:amount-tweets-user}
 \end{figure}
 
+Loglikelihood ratios where compared to estimate the most likely fit.
+We can see from the table~\ref{tab:powerlaw} the most likely fit might be Truncated Power Law.
+Comparison between different distributions are pointing that lognormal or truncated power law are the most likely, where truncated power law is significantly stronger fit (p $>$ 0.05).
+Usually this means we might have too many data entries and the rest of the data "fall-off" from the power law.
+We might be able to analyzse tails bit better, but it is left out of the scope in this assignment.
+TODO
+
+\begin{figure};
+\includegraphics[scale=0.5]{figures/amount_tweets_powerlaw}
+\caption{Comparing distribution candidates}
+\label{fig:amount-tweets-powerlaw}
+\end{figure}
+
+Data was further sorted for top 10 users by mentions, retweets and hashtag usages and plotted by Matplotlib.
+Results are shown in the figure~\ref{fig:amount-mentions-user},~\ref{fig:amount-retweets-user}, and~\ref{fig:amount-hashtags-user}.
+
+These three figures show that similar usernames are appearing on all three categories, but mostly in different order.
+This might be partially explained with the power law, as minority of the user amount are mostly responsible from the tweets,
+and with enough content diversity of the tweets, they can reach top position on multiple categories.
+Based on this, these users are effectively using properties of Twitter platform to connect to other users, potentially gaining more visibility.
+These users are mainly responsible on distributing messages.
+
+
+\begin{figure}
+\includegraphics[scale=0.6]{figures/amount_retweets_user}
+\caption{Top10 users by retweeting.}
+\label{fig:amount-retweets-user}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.6]{figures/amount_hashtags_user}
+\caption{Top10 users by usage of hashtags.}
+\label{fig:amount-hashtags-user}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.6]{figures/amount_mentions_user}
+\caption{Top10 users by usage of mentions.}
+\label{fig:amount-mentions-user}
+\end{figure}
+\begin{table}
+    \begin{tabular}{ |c|c|c|c|}
+        \hline
+        Distribution 1 & Distribution 2 & R & \textit{p} \\
+        \hline
+        Power Law & Lognormal & -0.96 & 0.34 \\
+        \hline
+        Power Law & Exponential & 0.83 & 0.40 \\
+        \hline
+        Exponential & Lognormal & -1.65 & 0.10 \\
+        \hline
+        Power Law & Truncated Power Law & -1.34 & 0.10 \\
+        \hline
+        Lognormal & Truncated Power Law & -0.36 & 0.27 \\
+        \hline
+    \end{tabular}
+    \caption{Loglikelihood rations of the different distributions}
+    \label{tab:powerlaw}
+\end{table}
+
+\subsection{Sentiment analysis}
+Sentiment analysis was applied for whole tweet data and also for tweets of previously calculated top10 users by different categories.
+
+In the figure \ref{fig:sentiment-ternary-all} we can see ternary plot of sentiment analysis among all tweets.
+Distribution isn't totally clear, as there are values with zero neutral weight, which leads points to be on really border.
+
+It implies that most of the
+
+\begin{figure}
+\includegraphics[scale=0.4]{figures/sentiment_ternary_all}
+\caption{Ternary plot of sentiment analysis of all tweets.}
+\label{fig:sentiment-ternary-all}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.4]{figures/sentiment_ternary_amount_hashtags}
+\caption{Ternary plot of tweets combined of top10 users by usage of hashtags }
+\label{fig:sentiment-ternary-user-hashtag}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.4]{figures/sentiment_ternary_amount_mentions}
+\caption{Ternary plot of tweets combined of top10 users by usage of mentions }
+\label{fig:sentiment-ternary-user-mention}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.4]{figures/sentiment_ternary_all}
+\caption{Ternary plot of tweets combined of top10 users by retweeting }
+\label{fig:sentiment-ternary-user-retweet}
+\end{figure}
 \section{Conclusion and Perspectives}\label{sec:conclusion-and-perspectives}
 
 %\subsection{Units}
