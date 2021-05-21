@@ -6,3 +6,4 @@ matplotlib
 vaderSentiment
 pytest
 numpy
+powerlaw

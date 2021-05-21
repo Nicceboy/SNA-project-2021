@@ -66,12 +66,12 @@ class TweetData:
         return datetime.datetime.strptime(time, "%m/%d/%Y %H:%M")
 
     def get_hashtags(self) -> List[str]:
-        """Get list of hashtags from single tweet"""
-        return re.findall(r"#(\w+)", self.tweet)
+        """Get list of hashtags from single tweet, lowercase"""
+        return list(map(lambda x: x.lower(), re.findall(r"#(\w+)", self.tweet)))
 
     def get_mentions(self) -> List[str]:
-        """Get list of mentions from single tweet"""
-        return re.findall(r"@(\w+)", self.tweet)
+        """Get list of mentions from single tweet, lowercase"""
+        return list(map(lambda x: x.lower(), re.findall(r"@(\w+)", self.tweet)))
 
     def is_retweet(self) -> bool:
         """Check if tweet starts with RT, remove quotes and whitespaces"""

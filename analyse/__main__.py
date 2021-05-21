@@ -16,6 +16,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 matplotlib.use("Qt5Agg")
 # matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
+import powerlaw
 from typing import Union, List, Dict
 from .tweetdata import TweetData, Sentiment
 from copy import deepcopy
@@ -83,8 +84,11 @@ def plot(
 ):
     # fig = plt.figure()
     # ax = fig.add_axes([0, 0, 1, 1])
+    tmp_fig = None
     if plot_type == "log":
-        plt.semilogx(labels, data)
+        # plt.semilogx(labels, data)
+        tmp_fig = plot_powerlaw(data, x_label)
+        y_label = "p(X)"
     elif plot_type == "bar":
         plt.bar(labels, data)
     # plt.axes().set_xlim(1, 1.5)
@@ -95,8 +99,25 @@ def plot(
     plt.tick_params("x", labelrotation=-45)
     # for tick in plt.get_xticklabels():
     #     tick.set_rotation(90)
+    # if tmp_fig:
+    #     handles, labels = tmp_fig.get_legend_handles_labels()
+    #     plt.legend(handles, labels, loc=3)
+    plt.savefig(f'{description.replace(" ", "")}.png', bbox_inches='tight')
     plt.show()
 
+
+def plot_powerlaw(data, x_label):
+    """Method for attempting to fit data into powerlaw"""
+    fit = powerlaw.Fit(data)
+    # fit.set_xlabel(x_label)
+    # fit.set_ylabel("p(X)")
+    fig2 = fit.plot_pdf(color='b', linewidth=2, label=r"Probability density")
+    fit.power_law.plot_pdf(color='b', linestyle='--', ax=fig2, )
+    fit.plot_ccdf(color='r', linewidth=2, ax=fig2)
+    fit.power_law.plot_ccdf(color='r', linestyle='--', ax=fig2, label=r"Cumulative distribution")
+    return fit
+    # powerlaw.savefig
+    # plt.show()
 
 def plot_users(
         users: Dict,
@@ -213,9 +234,9 @@ def main(_args: argparse.Namespace):
         plot_users(
             users_sorted,
             "amount_tweets",
-            "User number",
-            "Amount tweets",
-            "Amount of tweets in logarithm scale, sorted as descending",
+            "Tweet Frequency",
+            "p(X)",
+            "Amount of tweets fitted into probability density and cumulative distribution function",
             plot_type="log",
         )
     users_sorted_10 = get_slice(users_sorted)
@@ -282,17 +303,30 @@ def main(_args: argparse.Namespace):
                     # Make unique pairs from hashtags, marking connection between hashtag
                     pairs = list(combinations(hashtags, 2))
                     G.add_edges_from(pairs)
+        # Create secondary graph of isolated components, later used for removing isolated components from original graph
         GLOBAL_LOGGER.debug("All nodes and edges added for hashtag graph")
+        GLOBAL_LOGGER.info(f"Number of isolates in the original graph: {nx.number_of_isolates(G)}")
+        isolated = nx.isolates(G)
+        GLOBAL_LOGGER.info("Removing isolates...")
+        G.remove_nodes_from(list(isolated))
+        GLOBAL_LOGGER.info(f"Number of isolates in the pruned graph: {nx.number_of_isolates(G)}")
         GLOBAL_LOGGER.info(f"There are {G.number_of_nodes()} nodes (unique hashtags) and {G.number_of_edges()}"
                            f" edges in the Graph")
         degrees = [v for (node, v) in G.degree()]
         degree_max = np.max(degrees)
         degree_min = np.min(degrees)
+        # diameter = nx.diameter(G)
+        average_c_coeff = nx.average_clustering(G)
+
+        # Generate sorted list of connected components, the largest at first
+        components = [len(c) for c in sorted(nx.connected_components(G), key=len, reverse=True)]
+        print(components[0])
         GLOBAL_LOGGER.info(f"The maximum degree is {degree_max}")
         GLOBAL_LOGGER.info(f"The minimum degree is {degree_min}")
-        GLOBAL_LOGGER.info(f"The average degree of the nodes is {np.mean(degrees):.1f}")
+        GLOBAL_LOGGER.info(f"The average degree of the nodes is {np.mean(degrees):.2f}")
         GLOBAL_LOGGER.info(f"The number of connected components is {nx.number_connected_components(G)}")
-
+        # GLOBAL_LOGGER.info(f"The diameter is {diameter:.2f}")
+        GLOBAL_LOGGER.info(f"The average clustering coefficient for the network is {average_c_coeff:.2f}")
 
         # nx.drawing.nx_pylab.draw_networkx_nodes(G)
         # plt.show()
