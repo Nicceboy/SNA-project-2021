@@ -227,7 +227,7 @@ Loglikelihood ratios where compared to estimate the most likely fit.
 We can see from the table~\ref{tab:powerlaw} the most likely fit might be Truncated Power Law.
 Comparison between different distributions are pointing that lognormal or truncated power law are the most likely, where truncated power law is significantly stronger fit (p $>$ 0.05).
 Usually this means we might have too many data entries and the rest of the data "fall-off" from the power law.
-We might be able to analyzse tails bit better, but it is left out of the scope in this assignment.
+We might be able to analyse tails bit better, but it is left out of the scope in this assignment.
 TODO
 
 \begin{figure};
@@ -238,6 +238,7 @@ TODO
 
 Data was further sorted for top 10 users by mentions, retweets and hashtag usages and plotted by Matplotlib.
 Results are shown in the figure~\ref{fig:amount-mentions-user},~\ref{fig:amount-retweets-user}, and~\ref{fig:amount-hashtags-user}.
+Usernames are partially shortened to not make them totally public.
 
 These three figures show that similar usernames are appearing on all three categories, but mostly in different order.
 This might be partially explained with the power law, as minority of the user amount are mostly responsible from the tweets,
@@ -284,12 +285,30 @@ These users are mainly responsible on distributing messages.
 \end{table}
 
 \subsection{Sentiment analysis}
-Sentiment analysis was applied for whole tweet data and also for tweets of previously calculated top10 users by different categories.
+Sentiment analysis was applied for whole tweet data and separately for tweets of previously calculated top10 users by different categories.
 
 In the figure \ref{fig:sentiment-ternary-all} we can see ternary plot of sentiment analysis among all tweets.
-Distribution isn't totally clear, as there are values with zero neutral weight, which leads points to be on really border.
+Distribution isn't totally clear, as there are many values with zero negative or neutral weight, which leads points to be on border of the ternary.
 
-It implies that most of the
+On a quick glance it seems that tweets are more weighted on negative side in general.
+After taking exact numbers, negative seems to have slight majority, and positive is in clear minority.
+
+\begin{itemize}
+    \item Amount of NEGATIVE values: 6948
+    \item Amount of NEUTRAL values: 6657
+    \item Amount of POSITIVE values: 3805
+\end{itemize}
+
+It implies that content of tweets is siding more on negative/neutral side than neutral/positive side in general.
+
+In figure \ref{fig:sentiment-ternary-user-hashtag} we can see ternary plot, where tweets are limited to top 10 users by usage of hashtags.
+In figure \ref{fig:sentiment-ternary-user-mention} ternary plot is constructed by usage of mentions of top 10 users.
+Finally in the figure \ref{fig:sentiment-ternary-user-retweet} ternary plot is created by the use of retweets.
+
+It is difficult to see drastic differences by the eye on ternary plots. The most signifiantly it seems that users with the most use
+of hastags, sentiment value seems to be mostly negative.
+
+TODO add table about values and percentage portions
 
 \begin{figure}
 \includegraphics[scale=0.4]{figures/sentiment_ternary_all}
@@ -314,6 +333,31 @@ It implies that most of the
 \caption{Ternary plot of tweets combined of top10 users by retweeting }
 \label{fig:sentiment-ternary-user-retweet}
 \end{figure}
+
+\subsection{Hashtag Network Analysis}
+
+Hashtag nework was build successfully with NetworkX.
+The core properties can be seen in the table x.
+
+\begin{table}
+    \begin{tabular}{ |c|c|c|c|}
+        \hline
+        Property & Value \\
+        \hline
+        Number of Nodes & 2347 \\
+        \hline
+        Number of Edges & 8215 \\
+        \hline
+        Diameter & \textit{infinite} \\
+        \hline
+        Average clustering coefficient & 0.59 \\
+        \hline
+        Size of the largest component & 1877 \\
+        \hline
+    \end{tabular}
+    \caption{Loglikelihood rations of the different distributions}
+    \label{tab:powerlaw}
+\end{table}
 \section{Conclusion and Perspectives}\label{sec:conclusion-and-perspectives}
 
 %\subsection{Units}

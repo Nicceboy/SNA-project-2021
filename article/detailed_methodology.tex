@@ -66,7 +66,7 @@ Some specific functions have been additionally created that previously created d
 Now we can plot and sort users based on their amount of tweets, amount of retweets, amount of mentions and by the amount of hashtag usages.
 Matplotlib Python package has been used for this.
 
-We are also interested to know, whether power law is applying here, in the context of tweets by single user.
+We are also interested to know, whether power law is applying here, in the context of tweets by single users.
 Power law is known to be functional relationship between two quantities, where probability distributions are  "heavy-tailed".
 Pareto principle (80-20) is commonly used as rule to see if data fits under power law\cite{enwiki:1023956740}.
 
@@ -86,6 +86,29 @@ Mainly Kolmogorov-Smirnov distance algorithm has been used to estimate whether d
 R is the loglikelihood ratio between the two candidate distributions, which will be positive if the data is more likely in the first distribution.
 P value is describing statistical significance of this value.
 
+\subsection{Network construction and main properties}
+
+NetworkX Python package was used for constructing network from hashtag usage in tweets.
+Every hashtag is describing unique node in the network, and edges are describing tweets where two or more different hashtags have been used.
+
+Some core measurements will be applied for the constructed network:  calculation of number of nodes, edges, diameter, average clustering coefficent and the size of the largest component.
+Diameter can be calculated only then, if network is fully connected, otherwise it is infinite.
+Average clustering coefficent is calculated as:
+
+\begin{equation*}\label{eq:clustering-coefficient}
+C = \frac{1}{n}\sum_{v \in G} c_v \tag{1}
+\end{equation*}
+
+\noindent where $n$ is the number of nodes in $G$.
+
+Further, PageRank has been calculated for the network.
+Originally PageRank was used to rank web pages, but is suitable for ranking other networks as well. \cite{ilprints422}
+With PageRank, we can rank network components by their incoming links.
+Explanation how PageRank works is left out the scope, as it was handled in the course lectures as well.
+
+PageRank distribution will be plotted by rank and value.
+Additionally, we will plot local clustering coefficient (LCC) for comparison.
+Plot type for LCC will be histogram as duplicate values are expected.
 
 \subsection{Degree Centrality}
 
@@ -95,7 +118,7 @@ The most important nodes have the most direct connections with others under degr
 The value can be computed as,
 
 \begin{equation*}\label{eq:degree-centrality}
-C_{D}(v_{i})={\sum}_{j}A_{ij} \tag{1}
+C_{D}(v_{i})={\sum}_{j}A_{ij} \tag{2}
 \end{equation*}
 
 \subsection{Betweeness Centrality}
@@ -105,6 +128,6 @@ It is describing the amount of the shortest path passing the node.
 Important nodes have high betweeness centrality, information is flowing through them, and they are connecting multiple nodes into the network.
 
 \begin{equation*}
-    C_{B}(v_{i})={\sum}_{v_{s}\neq v_{i}\neq v_{t}\in V,s < \text{t}}\frac{\sigma_{st}(v_{i})}{\sigma_{st}} \tag{2}
+    C_{B}(v_{i})={\sum}_{v_{s}\neq v_{i}\neq v_{t}\in V,s < \text{t}}\frac{\sigma_{st}(v_{i})}{\sigma_{st}} \tag{3}
 \end{equation*}
 

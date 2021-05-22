@@ -310,16 +310,6 @@ def main(_args: argparse.Namespace):
     G = nx.Graph()
 
     create_edge_network = True
-    # G = nx.petersen_graph()
-    #
-    # plt.subplot(121)
-    #
-    # nx.draw(G, with_labels=True, font_weight='bold')
-    #
-    # plt.subplot(122)
-    #
-    # nx.draw_shell(G, nlist=[range(5, 10), range(5)], with_labels=True, font_weight='bold')
-    # plt.show()
     if create_edge_network:
         for tweet in data:
             hashtags = tweet.get_hashtags()
@@ -337,8 +327,8 @@ def main(_args: argparse.Namespace):
         GLOBAL_LOGGER.debug("All nodes and edges added for hashtag graph")
         GLOBAL_LOGGER.info(f"Number of isolates in the original graph: {nx.number_of_isolates(G)}")
         isolated = nx.isolates(G)
-        GLOBAL_LOGGER.info("Removing isolates...")
-        G.remove_nodes_from(list(isolated))
+        # GLOBAL_LOGGER.info("Removing isolates...")
+        # G.remove_nodes_from(list(isolated))
         GLOBAL_LOGGER.info(f"Number of isolates in the pruned graph: {nx.number_of_isolates(G)}")
         GLOBAL_LOGGER.info(f"There are {G.number_of_nodes()} nodes (unique hashtags) and {G.number_of_edges()}"
                            f" edges in the Graph")
@@ -350,13 +340,60 @@ def main(_args: argparse.Namespace):
 
         # Generate sorted list of connected components, the largest at first
         components = [len(c) for c in sorted(nx.connected_components(G), key=len, reverse=True)]
-        print(components[0])
         GLOBAL_LOGGER.info(f"The maximum degree is {degree_max}")
         GLOBAL_LOGGER.info(f"The minimum degree is {degree_min}")
         GLOBAL_LOGGER.info(f"The average degree of the nodes is {np.mean(degrees):.2f}")
         GLOBAL_LOGGER.info(f"The number of connected components is {nx.number_connected_components(G)}")
-        # GLOBAL_LOGGER.info(f"The diameter is {diameter:.2f}")
+        GLOBAL_LOGGER.info(f"The size of the largest component is {components[0]}")
+        if nx.is_connected(G):
+            diameter = nx.diameter(G)
+            GLOBAL_LOGGER.info(f"The diameter is {diameter:.2f}")
+        else:
+            GLOBAL_LOGGER.info(f"Diameter of graph is infinite as not all nodes are connected.")
+
         GLOBAL_LOGGER.info(f"The average clustering coefficient for the network is {average_c_coeff:.2f}")
+
+        page_rank = True
+        if page_rank:
+            GLOBAL_LOGGER.info("Creating plot for PageRank.")
+            pr = nx.pagerank_numpy(G, alpha=0.9)
+            # Sort rank of every key-value pair
+            pr_rank = sorted(pr.items(), key=lambda x: x[1], reverse=True)
+            values = [k[1] for k in pr_rank]
+            amount = range(1, len(values) + 1)
+            plt.scatter(amount, values)
+            plt.xlabel("Rank of hashtag")
+            plt.ylabel("PageRank value")
+            plt.title("PageRank distribution of hashtag popularity")
+            for index, item in enumerate(pr_rank[:10]):
+                GLOBAL_LOGGER.info(f"Rank: {index + 1}, hashtag: {item[0]}")
+            plt.savefig(f'article/figures/pagerank_distribution.png', bbox_inches='tight')
+            if args.show:
+                plt.show()
+            else:
+                plt.close()
+
+        local_cluster_coefficent = True
+        if local_cluster_coefficent:
+            clusters = nx.clustering(G)
+            plt.hist(clusters.values(), bins=10)
+            plt.title("Distribution of LCC")
+            plt.xlabel('Clustering')
+            plt.ylabel('Frequency')
+            plt.savefig(f'article/figures/lcc_distribution.png', bbox_inches='tight')
+            if args.show:
+                plt.show()
+            else:
+                plt.close()
+
+        girvan = False
+        if girvan:
+            k = 4
+            comp = nx.algorithms.community.centrality.girvan_newman(G)
+            for communities in islice(comp, k):
+                print(tuple(sorted(c) for c in communities))
+
+                # Calculate pagerank
 
         # nx.drawing.nx_pylab.draw_networkx_nodes(G)
         # plt.show()
