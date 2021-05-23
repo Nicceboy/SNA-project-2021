@@ -234,6 +234,37 @@ def get_slice(data: Dict, n: int = 10) -> Dict:
     return dict(islice(data.items(), n))
 
 
+def get_graph_info(G: nx.Graph):
+    """Calculate core information of graph"""
+    GLOBAL_LOGGER.info(f"Number of isolates in the pruned graph: {nx.number_of_isolates(G)}")
+    GLOBAL_LOGGER.info(f"There are {G.number_of_nodes()} nodes (unique hashtags) and {G.number_of_edges()}"
+                       f" edges in the Graph")
+    degrees = [v for (node, v) in G.degree()]
+    degree_max = np.max(degrees)
+    degree_min = np.min(degrees)
+    # diameter = nx.diameter(G)
+    average_c_coeff = nx.average_clustering(G)
+
+    # Generate sorted list of connected components, the largest at first
+    components = [len(c) for c in sorted(nx.connected_components(G), key=len, reverse=True)]
+    GLOBAL_LOGGER.info(f"The maximum degree is {degree_max}")
+    GLOBAL_LOGGER.info(f"The minimum degree is {degree_min}")
+    GLOBAL_LOGGER.info(f"The average degree of the nodes is {np.mean(degrees):.2f}")
+    GLOBAL_LOGGER.info(f"The number of connected components is {nx.number_connected_components(G)}")
+    GLOBAL_LOGGER.info(f"The size of the largest component is {components[0]}")
+    if nx.is_connected(G):
+        diameter = nx.diameter(G)
+        GLOBAL_LOGGER.info(f"The diameter is {diameter:.2f}")
+    else:
+        S = max(nx.connected_components(G), key=len)
+        diameter = nx.diameter(G.subgraph(S).copy())
+        GLOBAL_LOGGER.info(
+            f"All nodes are not connected, estimated length based on the subgraph"
+            f" created from the biggest component: {diameter}")
+
+    GLOBAL_LOGGER.info(f"The average clustering coefficient for the network is {average_c_coeff:.2f}")
+
+
 def main(_args: argparse.Namespace):
     DATA_PATH = pathlib.Path("data/isis_twitter_data.csv")
 
@@ -323,38 +354,26 @@ def main(_args: argparse.Namespace):
                     # Make unique pairs from hashtags, marking connection between hashtag
                     pairs = list(combinations(hashtags, 2))
                     G.add_edges_from(pairs)
+        # Reduce network node amount by hashtag occurrences in tweets
+        if args.k:
+            # Remove isolated notes at first
+            isolated = nx.isolates(G)
+            GLOBAL_LOGGER.info("Removing isolates...")
+            G.remove_nodes_from(list(isolated))
+            # Remove nodes based on amount of connections: amount of appearances of tweets with hashtag pairs
+            filter_by = [node for (node, v) in G.degree() if v < int(args.k)]
+            G.remove_nodes_from(filter_by)
         # Create secondary graph of isolated components, later used for removing isolated components from original graph
         GLOBAL_LOGGER.debug("All nodes and edges added for hashtag graph")
-        GLOBAL_LOGGER.info(f"Number of isolates in the original graph: {nx.number_of_isolates(G)}")
-        isolated = nx.isolates(G)
-        # GLOBAL_LOGGER.info("Removing isolates...")
-        # G.remove_nodes_from(list(isolated))
-        GLOBAL_LOGGER.info(f"Number of isolates in the pruned graph: {nx.number_of_isolates(G)}")
-        GLOBAL_LOGGER.info(f"There are {G.number_of_nodes()} nodes (unique hashtags) and {G.number_of_edges()}"
-                           f" edges in the Graph")
-        degrees = [v for (node, v) in G.degree()]
-        degree_max = np.max(degrees)
-        degree_min = np.min(degrees)
-        # diameter = nx.diameter(G)
-        average_c_coeff = nx.average_clustering(G)
+        get_graph_info(G)
+        if args.show:
+            Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
+            pos = nx.spring_layout(Gcc)
+            nx.draw_networkx_nodes(Gcc, pos, node_size=10)
+            nx.draw_networkx_edges(Gcc, pos, alpha=0.4)
+            plt.show()
 
-        # Generate sorted list of connected components, the largest at first
-        components = [len(c) for c in sorted(nx.connected_components(G), key=len, reverse=True)]
-        GLOBAL_LOGGER.info(f"The maximum degree is {degree_max}")
-        GLOBAL_LOGGER.info(f"The minimum degree is {degree_min}")
-        GLOBAL_LOGGER.info(f"The average degree of the nodes is {np.mean(degrees):.2f}")
-        GLOBAL_LOGGER.info(f"The number of connected components is {nx.number_connected_components(G)}")
-        GLOBAL_LOGGER.info(f"The size of the largest component is {components[0]}")
-        if nx.is_connected(G):
-            diameter = nx.diameter(G)
-            GLOBAL_LOGGER.info(f"The diameter is {diameter:.2f}")
-        else:
-            GLOBAL_LOGGER.info(f"Diameter of graph is infinite as not all nodes are connected.")
-
-        GLOBAL_LOGGER.info(f"The average clustering coefficient for the network is {average_c_coeff:.2f}")
-
-        page_rank = True
-        if page_rank:
+        if args.page_rank:
             GLOBAL_LOGGER.info("Creating plot for PageRank.")
             pr = nx.pagerank_numpy(G, alpha=0.9)
             # Sort rank of every key-value pair
@@ -373,8 +392,7 @@ def main(_args: argparse.Namespace):
             else:
                 plt.close()
 
-        local_cluster_coefficent = True
-        if local_cluster_coefficent:
+        if args.lcc:
             clusters = nx.clustering(G)
             plt.hist(clusters.values(), bins=10)
             plt.title("Distribution of LCC")
@@ -386,14 +404,22 @@ def main(_args: argparse.Namespace):
             else:
                 plt.close()
 
-        girvan = False
-        if girvan:
-            k = 4
+        if args.girvann:
+            GLOBAL_LOGGER.info(f"Starting Girvan-Newmann analysis.")
+            k = 1
             comp = nx.algorithms.community.centrality.girvan_newman(G)
+            test = 1
             for communities in islice(comp, k):
-                print(tuple(sorted(c) for c in communities))
-
-                # Calculate pagerank
+                data = tuple(sorted(c) for c in communities)
+                print(len(data))
+                # with open(f"file{test}.txt", "w") as f:
+                #     f.write(str(data))
+                # test += 1
+            # with open("file1.new.txt") as f:
+            #     data = json.load(f).get("data")
+            #     GLOBAL_LOGGER.info(f"Amount of communities: {len(data)}")
+            # print(data[0])
+            # Calculate pagerank
 
         # nx.drawing.nx_pylab.draw_networkx_nodes(G)
         # plt.show()
@@ -428,6 +454,13 @@ if __name__ == "__main__":
         action="store_true"
     )
     parser.add_argument(
+        "-k",
+        dest="k",
+        help="Reduced graph size by requiring k amount of ",
+        nargs='?',
+        default=0
+    )
+    parser.add_argument(
         "--plot-tweets",
         dest="plot_tweets",
         help="Plot tweets",
@@ -437,6 +470,24 @@ if __name__ == "__main__":
         "--sentiment",
         dest="sentiment",
         help="Make sentiment analysis for data.",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--lcc",
+        dest="lcc",
+        help="Make Local Clustering Coefficient distribution plot for hashtag network",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--page-rank",
+        dest="page_rank",
+        help="Make and plot PageRank distribution.",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--girvann",
+        dest="girvann",
+        help="Make Girvan-Newman analysis to find communities from the network.",
         action="store_true"
     )
     if 1 <= len(sys.argv):

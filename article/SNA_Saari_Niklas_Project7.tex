@@ -205,7 +205,7 @@ Vader Sentiment\cite{Hutto_Gilbert_2014} tool has been used to identify sentimen
 \section{Results and Discussion}\label{sec:results-and-discussion}
 
 Initial dataset contained more than 17~000 tweets and 114 different users.
-Results of analysis are handled in this section.
+Multiple different methods we applied for analysing data, and results will be discussed in this section.
 
 \subsection{Basic measurements}
 
@@ -232,7 +232,7 @@ TODO
 
 \begin{figure};
 \includegraphics[scale=0.5]{figures/amount_tweets_powerlaw}
-\caption{Comparing distribution candidates}
+\caption{Distribution candidates for amount of tweets per user}
 \label{fig:amount-tweets-powerlaw}
 \end{figure}
 
@@ -288,7 +288,7 @@ These users are mainly responsible on distributing messages.
 Sentiment analysis was applied for whole tweet data and separately for tweets of previously calculated top10 users by different categories.
 
 In the figure \ref{fig:sentiment-ternary-all} we can see ternary plot of sentiment analysis among all tweets.
-Distribution isn't totally clear, as there are many values with zero negative or neutral weight, which leads points to be on border of the ternary.
+Distribution isn't totally clear, as there are many values with zero negative or positive weight, which leads points to be on the border of the ternary.
 
 On a quick glance it seems that tweets are more weighted on negative side in general.
 After taking exact numbers, negative seems to have slight majority, and positive is in clear minority.
@@ -336,8 +336,53 @@ TODO add table about values and percentage portions
 
 \subsection{Hashtag Network Analysis}
 
-Hashtag nework was build successfully with NetworkX.
-The core properties can be seen in the table x.
+Hashtag network was build successfully with NetworkX.
+The core properties can be seen in the table \ref{tab:hashtag-network}.
+To get initial visual view, we can take a glance on figure \ref{fig:graph-general} and figure \ref{fig:graph-general-zoomed} on Appendixes.
+There is one giant community.
+There are around 4x amount of edges compared to nodes, hence the network has many connections.
+All nodes are not connected and diameter was estimated based on the biggest component.
+It was expected that network will not be totally connected - tweet might have only one hashtag or another one is sole loner and unique.
+
+For ranking these connections, PageRank distribution has been calculated and can be seen on the figure \ref{fig:pagerank}.
+Based on the figure, we can deduce that small portion of hashtags has significantly higher rank value that most of them.
+Out of the curiosity, top 10 hashtag names based on PageRank are listed in the table \ref{fig:sentiment-ternary-all}.
+Note, that names are normalized to be lowercase, since they are case-insensitive when construction networks on Twitter platform behind the scenes.
+
+Histogram of LCC can be seen in the figure \ref{fig:lcc}.
+As the total amount of nodes (unique hashtags) were 2347, we can see that clear majority of them has either LCC value close to zero (600+) or 1 (more than 1000), meaning
+they have barely connections or they are almost fully connected, being "complete graph".
+
+
+\begin{table}
+    \begin{tabular}{ |c|c|}
+        \hline
+        Rank # & Hashtag \\
+        \hline
+        1 & isis \\
+        \hline
+        2 & islamicstate \\
+        \hline
+        3 & syria \\
+        \hline
+        4 & is \\
+        \hline
+        5 & breaking \\
+        \hline
+        6 & amaqagency \\
+        \hline
+        7 & iraq \\
+        \hline
+        8 & caliphate\_news \\
+        \hline
+        9 & aleppo \\
+        \hline
+        10 & assad \\
+        \hline
+    \end{tabular}
+    \caption{Top10 hashtags by PageRank}
+    \label{tab:hashtag-names}
+\end{table}
 
 \begin{table}
     \begin{tabular}{ |c|c|c|c|}
@@ -348,16 +393,33 @@ The core properties can be seen in the table x.
         \hline
         Number of Edges & 8215 \\
         \hline
-        Diameter & \textit{infinite} \\
+        Diameter & 9 (estimate) \\
         \hline
         Average clustering coefficient & 0.59 \\
         \hline
         Size of the largest component & 1877 \\
         \hline
     \end{tabular}
-    \caption{Loglikelihood rations of the different distributions}
-    \label{tab:powerlaw}
+    \caption{Core properties of created hashtag network}
+    \label{tab:hashtag-network}
 \end{table}
+
+\begin{figure}
+    \includegraphics[scale=0.6]{figures/pagerank_distribution}
+    \caption{PageRank of different hashtags.}
+    \label{fig:pagerank}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[scale=0.6]{figures/lcc_distribution}
+    \caption{Local Clustering Coefficient distribution}
+    \label{fig:lcc}
+\end{figure}
+
+To get more information about underlying communities inside network, Girwan-Newmann algorithm was used.
+Based on the initial visual graph, k value of 3 was initially selected as depth to get communities.
+It looked a good candidate to limit communities to the biggest ones inside the first giant community.
+
 \section{Conclusion and Perspectives}\label{sec:conclusion-and-perspectives}
 
 %\subsection{Units}
@@ -552,4 +614,15 @@ The core properties can be seen in the table x.
     \label{fig:appendix_terrorism_deaths}
 \end{figure*}\label{subsec:data-verification-after-some-pre-processing-methods}
 
+\begin{figure*}
+    \includegraphics[scale=0.32]{figures/general_graph}
+    \caption{General view of the hashtag graph. One giant commumity.}
+    \label{fig:graph-general}
+\end{figure*}
+
+\begin{figure*}
+    \includegraphics[scale=0.32]{figures/general_graph_zoomed}
+    \caption{Zoomed view to the giant community reveals more communities.}
+    \label{fig:graph-general-zoomed}
+\end{figure*}
 \end{document}

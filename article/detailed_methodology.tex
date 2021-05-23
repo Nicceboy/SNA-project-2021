@@ -91,8 +91,10 @@ P value is describing statistical significance of this value.
 NetworkX Python package was used for constructing network from hashtag usage in tweets.
 Every hashtag is describing unique node in the network, and edges are describing tweets where two or more different hashtags have been used.
 
-Some core measurements will be applied for the constructed network:  calculation of number of nodes, edges, diameter, average clustering coefficent and the size of the largest component.
-Diameter can be calculated only then, if network is fully connected, otherwise it is infinite.
+Some core measurements will be applied for the constructed network:  calculation of number of nodes, edges, diameter, average clustering coefficient and the size of the largest component.
+Diameter can be calculated usually only then, if network is fully connected, otherwise it is infinite.
+However, we can try to estimate diameter by finding the biggest component, and creating subgraph from that, finally calculating diameter for that.
+
 Average clustering coefficent is calculated as:
 
 \begin{equation*}\label{eq:clustering-coefficient}
@@ -102,7 +104,8 @@ C = \frac{1}{n}\sum_{v \in G} c_v \tag{1}
 \noindent where $n$ is the number of nodes in $G$.
 
 Further, PageRank has been calculated for the network.
-Originally PageRank was used to rank web pages, but is suitable for ranking other networks as well. \cite{ilprints422}
+It can be thought as variant of eigenvector centrality.
+Originally PageRank was used to rank web pages, but is suitable for ranking other networks as well.\cite{ilprints422}
 With PageRank, we can rank network components by their incoming links.
 Explanation how PageRank works is left out the scope, as it was handled in the course lectures as well.
 
