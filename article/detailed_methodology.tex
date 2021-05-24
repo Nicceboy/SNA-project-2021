@@ -184,3 +184,11 @@ PageRank distribution will be plotted by rank and value.
 Additionally, we will plot local clustering coefficient (LCC) for comparison.
 Plot type for LCC will be histogram as duplicate values are expected.
 
+\subsubsection{Girvan-Newman}
+
+Finally, Girvan-Newman algorithm will be used find possible communities.
+It works progressively by calculating betweenneess values to detect "the most valuable" edge, and then removes it.
+Every iteration potentially changes the size and the contents of the communities, by starting to move from the biggest one to
+other communities, depending on the important edges.
+Algorithm takes a lot of time to execute, but is fairly efficient in terms of results.
+Final results can be used to identify major communities, their sizes and what is their major topic.

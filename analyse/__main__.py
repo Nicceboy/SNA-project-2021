@@ -4,6 +4,7 @@ import csv
 import logging
 import pathlib
 import sys
+import json
 
 import matplotlib
 import networkx as nx
@@ -474,7 +475,7 @@ def main(_args: argparse.Namespace):
 
     elif args.create_network:
         G = create_network(data)
-        get_graph_info(G)
+        # get_graph_info(G)
     GLOBAL_LOGGER.debug("All nodes and edges added for hashtag graph")
     if args.show:
         Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
@@ -515,19 +516,29 @@ def main(_args: argparse.Namespace):
             plt.close()
 
     if args.girvann:
+        if not args.create_network:
+            GLOBAL_LOGGER.error("--create-network parameter required with girvan-newmann analysis.")
+            exit(1)
         GLOBAL_LOGGER.info(f"Starting Girvan-Newmann analysis.")
-        k = 7
-        comp = nx.algorithms.community.centrality.girvan_newman(G)
-        test = 1
-        for communities in islice(comp, k):
-            data = tuple(sorted(c) for c in communities)
-            print(len(data))
-            # with open(f"file{test}.txt", "w") as f:
-            #     f.write(str(data))
-            # test += 1
-        # with open("file1.new.txt") as f:
-        #     data = json.load(f).get("data")
-        #     GLOBAL_LOGGER.info(f"Amount of communities: {len(data)}")
+        k = 10
+        # comp = nx.algorithms.community.centrality.girvan_newman(G)
+        # test = 1
+        # for communities in islice(comp, k):
+        #     data = list(sorted(c) for c in communities)
+        #     print(data)
+        #     print(len(data))
+        #     with open(f"file{test}.txt", "w") as f:
+        #         # f.write(str(data))
+        #         json.dump(data, f)
+        #     test += 1
+        with open("file10.txt") as f:
+            data = json.load(f)
+            data_sorted = sorted(data, key=len, reverse=True)
+            print(data_sorted[4])
+            for d in data_sorted[:10]:
+                print(len(d))
+                # print(d)
+            # GLOBAL_LOGGER.info(f"Amount of communities: {len(data)}")
         # print(data[0])
         # Calculate pagerank
 

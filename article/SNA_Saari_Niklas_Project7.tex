@@ -42,6 +42,8 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
         To possibly prevent future terror events, it would be important to study these social networks on how they are used by these radical groups.
         ISIS Twitter dataset of around 17~000 tweets was selected as dataset to identify important characters from the network, to construct communities and to see how the most influencers behave, who they are, and how they connect to other people.
         Further communities were constructed to see how networks behave internally.
+        Initial results suggests that primal pro-ISIS fanboy accounts were identified, and they are using social networks efficiently to distribute messages by creating
+        close communities with selected hashtags.
 
     \end{abstract}
 
@@ -315,8 +317,6 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
     It is difficult to see drastic differences by the eye on ternary plots. The most significantly it seems that users with the most use
     of hashtags, sentiment value seems to be mostly negative.
 
-    TODO add table about values and percentage portions
-
     \begin{figure}
         \includegraphics[scale=0.4]{figures/sentiment_ternary_all}
         \caption{Ternary plot of sentiment analysis of all tweets.}
@@ -340,6 +340,63 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
         \caption{Ternary plot of tweets combined of top10 users by retweeting }
         \label{fig:sentiment-ternary-user-retweet}
     \end{figure}
+
+
+    \begin{table*}[ht]
+        \begin{tabular} { | c | c | c | c | c | c | c | c | c | }
+            \hline
+            k & Nodes \# & Edges \# & Largest component & Diameter & Avg. Clustering Coef. & Avg. Degree
+            & Avg. Closeness
+            & Avg. Betweenness
+            \\
+            \hline
+            1  & 2347 & 8215 & 1877 & 9  & 0.59 & 7.0  & 0.2  & 0.0 \\
+            \hline
+            2  & 2347 & 2149 & 591  & 9  & 0.16 & 1.83 & 0.02 & 0.0 \\
+            \hline
+            3  & 2347 & 1094 & 339  & 11 & 0.07 & 0.93 & 0.01 & 0.0 \\
+            \hline
+            4  & 2347 & 753  & 218  & 6  & 0.05 & 0.64 & 0.0  & 0.0 \\
+            \hline
+            5  & 2347 & 561  & 177  & 6  & 0.05 & 0.48 & 0.0  & 0.0 \\
+            \hline
+            10 & 2347 & 249  & 89   & 5  & 0.02 & 0.21 & 0.0  & 0.0 \\
+            \hline
+            15 & 2347 & 156  & 59   & 4  & 0.01 & 0.13 & 0.0  & 0.0 \\
+            \hline
+
+        \end{tabular}
+        \caption {Core measurements of hashtag graph by minimal hashtag pair occurrences (k)}
+        \label {tab:graphstats-by-k}
+    \end{table*}
+
+    \begin{table*}[ht]
+        \begin{tabular} { | c | c | c | c | c | c | c | c | c | }
+            \hline
+            k & Nodes \# & Edges \# & Largest component & Diameter & Avg. Clustering Coef. & Avg. Degree
+            & Avg. Closeness
+            & Avg. Betweenness
+            \\
+            \hline
+            1  & 2078 & 8215 & 1877 & 9  & 0.66 & 7.91 & 0.26 & 0.0  \\
+            \hline
+            2  & 653  & 2149 & 591  & 9  & 0.57 & 6.58 & 0.28 & 0.0  \\
+            \hline
+            3  & 374  & 1094 & 339  & 11 & 0.46 & 5.85 & 0.28 & 0.0  \\
+            \hline
+            4  & 244  & 753  & 218  & 6  & 0.51 & 6.17 & 0.31 & 0.01 \\
+            \hline
+            5  & 192  & 561  & 177  & 6  & 0.55 & 5.84 & 0.33 & 0.01 \\
+            \hline
+            10 & 96   & 249  & 89   & 5  & 0.51 & 5.19 & 0.37 & 0.01 \\
+            \hline
+            15 & 64   & 156  & 59   & 4  & 0.55 & 4.88 & 0.39 & 0.02 \\
+            \hline
+
+        \end{tabular}
+        \caption {Core measurements of hashtag graph by minimal hashtag pair occurrences (k), removing nodes without connections}
+        \label {tab:graphstats-by-k-no-connect}
+    \end{table*}
 
     \subsection{Hashtag Network Analysis}
 
@@ -418,61 +475,6 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
     \end{table}
 
 
-    \begin{table*}[ht]
-        \begin{tabular} { | c | c | c | c | c | c | c | c | c | }
-            \hline
-            k & Nodes \# & Edges \# & Largest component & Diameter & Avg. Clustering Coef. & Avg. Degree
-            & Avg. Closeness
-            & Avg. Betweenness
-            \\
-            \hline
-            1  & 2347 & 8215 & 1877 & 9  & 0.59 & 7.0  & 0.2  & 0.0 \\
-            \hline
-            2  & 2347 & 2149 & 591  & 9  & 0.16 & 1.83 & 0.02 & 0.0 \\
-            \hline
-            3  & 2347 & 1094 & 339  & 11 & 0.07 & 0.93 & 0.01 & 0.0 \\
-            \hline
-            4  & 2347 & 753  & 218  & 6  & 0.05 & 0.64 & 0.0  & 0.0 \\
-            \hline
-            5  & 2347 & 561  & 177  & 6  & 0.05 & 0.48 & 0.0  & 0.0 \\
-            \hline
-            10 & 2347 & 249  & 89   & 5  & 0.02 & 0.21 & 0.0  & 0.0 \\
-            \hline
-            15 & 2347 & 156  & 59   & 4  & 0.01 & 0.13 & 0.0  & 0.0 \\
-            \hline
-
-        \end{tabular}
-        \caption {Core measurements of hashtag graph by minimal hashtag pair occurrences (k)}
-        \label {tab:graphstats-by-k}
-    \end{table*}
-
-    \begin{table*}[ht]
-        \begin{tabular} { | c | c | c | c | c | c | c | c | c | }
-            \hline
-            k & Nodes \# & Edges \# & Largest component & Diameter & Avg. Clustering Coef. & Avg. Degree
-            & Avg. Closeness
-            & Avg. Betweenness
-            \\
-            \hline
-            1  & 2078 & 8215 & 1877 & 9  & 0.66 & 7.91 & 0.26 & 0.0  \\
-            \hline
-            2  & 653  & 2149 & 591  & 9  & 0.57 & 6.58 & 0.28 & 0.0  \\
-            \hline
-            3  & 374  & 1094 & 339  & 11 & 0.46 & 5.85 & 0.28 & 0.0  \\
-            \hline
-            4  & 244  & 753  & 218  & 6  & 0.51 & 6.17 & 0.31 & 0.01 \\
-            \hline
-            5  & 192  & 561  & 177  & 6  & 0.55 & 5.84 & 0.33 & 0.01 \\
-            \hline
-            10 & 96   & 249  & 89   & 5  & 0.51 & 5.19 & 0.37 & 0.01 \\
-            \hline
-            15 & 64   & 156  & 59   & 4  & 0.55 & 4.88 & 0.39 & 0.02 \\
-            \hline
-
-        \end{tabular}
-        \caption {Core measurements of hashtag graph by minimal hashtag pair occurrences (k), removing nodes without connections}
-        \label {tab:graphstats-by-k-no-connect}
-    \end{table*}
 
     \begin{figure}
         \includegraphics[scale=0.6]{figures/pagerank_distribution}
@@ -487,8 +489,28 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
     \end{figure}
 
     To get more information about underlying communities inside network, Girwan-Newmann algorithm was used.
-    Based on the initial visual graphs, k value of 3 was initially selected as depth to get communities.
+    Based on the initial visual graphs, iteration value of 10 was initially selected as depth to get communities.
     It looked a good candidate to limit communities to the biggest ones inside the first giant community.
+    However, it appeared to be ineffective, and reduced the giant community only into the size of 1654 nodes, when the initial size was 1877.
+
+    At this point, we had top 5 communities with following sizes:
+
+    \begin{enumerate}
+        \item 1654
+        \item 145
+        \item 33
+        \item 16
+        \item 8
+    \end{enumerate}
+
+    The first community is still too big to estimate content based on the used hashtags.
+    Due to time concerns, no more details are extracted in this case.
+    The second community is interesting in terms of size  - and based on the hashtag contents, it seems to be fully using foreign language hashtags,
+    potentially in arabic.
+    It is potentially a community which does not use English as the majority of the tweets are using.
+    Third community seems to be using foreign language as well.
+    Fourth community seems to be related on cyber topic, containing hashtags for example of 'cyberjihad', 'cybernews', 'hacked', 'status', 'ucc', 'website'.
+    Fifth community seems to be related on the Islam religion, with limited amount of hashtags is is harder to limit more.
 
 
     \section{Conclusion and Perspectives}\label{sec:conclusion-and-perspectives}
@@ -496,27 +518,39 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
     Network from over 17~000 tweets was constructed by using identified connections with hashtags.
     So far results have been interpreted from statistical point of view, generalizing results for Twitter platform.
     Based on the results, we could identify potential core accounts behind pro-ISIS fanboys on distributing messages.
-    The way how tweets are distributed tells that only a limited amount of ISIS members are mostly responsible about them.
-    These core accounts are using Twitter very efficiently; they use limited set of hashtags (such as ISIS, Iraq, Syria, Breaking, Aleppo) with other hashtags, on repeating matter.
-
-    Similar accounts appear to be top10 on use of mentions, retweeting and using of hashtags.
-    Based on sentiment analysis, the tweet contents appear to be mostly negative, which is not surprise, as data is coming from terrorism organization fanboys.
+    The way how tweets are distributed (e.g. Tweet frequency per user seems to follow truncated power law)
+    tells that only a limited amount of users are mostly responsible about them.
     Similar observations have been identified in other studies such as "Pro-ISIS fanboys network analysis and attack detection through Twitter data"\cite{8078846} which used same dataset.
     In the study, selected amount of users were identified to be with the most influence, being similar usernames than in this study.
 
-    Only by removing top 10 accounts in terms of tweets, we could potentially decrease the underlying communities in this network.
+    These core accounts are using Twitter very efficiently; they use limited set of hashtags (such as ISIS, Iraq, Syria, Breaking, Aleppo) with other hashtags, on repeating matter.
+    Use of multiple hashtags with preserving core hashtags supports this.
+    Different topics are efficiently connected together, possibly making core hashtags "trending" on the platform.
+    Hashtags are potentially granting a way to broadcast topics while avoiding ban from the platform when compared to other places (e.g. public forum)
 
-    We can link the dataset directly to ISIS based on the strongest node (hashtag) names in the network.
+    Similar accounts appear to be top 10 on use of mentions, retweeting and using of hashtags.
+    Based on sentiment analysis, the tweet contents appear to be mostly negative, which is not surprise, as data is coming from terrorism organization fanboys.
+    Negativity seems to be more significant when viewed from the point of hashtags, retweets or mentions.
+    This could imply negative contents to finally attract more attention.
+
+    Only by removing top 10 accounts in terms of tweets, we could potentially decrease the underlying communities significantly in this network.
+
+    Girvan-Newman algorith was used to detect underlying communities.
+    Due to time constraints, only brief look for top level communities were looked.
+    It was able to detect communities using foreign language, handling cyber security related content and purely Islam religion related.
+    We can speculate, that these are outside the main message, what this specific network is handling, and that is also the reason why they were firstly removed from the whole network.
+
+    We can link the dataset directly to ISIS based on the most influencing node (hashtag) names in the network.
 
     Overall, graph study seems to be efficient way to study networks appearing in the Twitter platform.
-
+    ISIS is using Twitter really efficiently to distribute their message.
 
 
     \bibliographystyle{./IEEEtran}
     \bibliography{./IEEEabrv,./references}
 %\vspace{12pt}
 
-
+    \newpage
     \section*{Appendix}
 
     \begin{figure*}
@@ -545,133 +579,133 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
     \begin{table}[ht]
         \begin{tabular} { | c | c | }
             \hline
-            Rank & Hashtag        \\
+            Rank & Hashtag         \\
             \hline
-            1    & isis           \\
+            1    & isis            \\
             \hline
-            2    & syria          \\
+            2    & syria           \\
             \hline
-            3    & iraq           \\
+            3    & iraq            \\
             \hline
-            4    & is             \\
+            4    & is              \\
             \hline
-            5    & aleppo         \\
+            5    & aleppo          \\
             \hline
-            6    & islamicstate   \\
+            6    & islamicstate    \\
             \hline
-            7    & breakingnews   \\
+            7    & breakingnews    \\
             \hline
-            8    & assad          \\
+            8    & assad           \\
             \hline
-            9    & ypg            \\
+            9    & ypg             \\
             \hline
-            10   & turkey         \\
+            10   & turkey          \\
             \hline
-            11   & palmyra        \\
+            11   & palmyra         \\
             \hline
-            12   & mosul          \\
+            12   & mosul           \\
             \hline
-            13   & usa            \\
+            13   & usa             \\
             \hline
-            14   & russia         \\
+            14   & russia          \\
             \hline
-            15   & amaqagency     \\
+            15   & amaqagency      \\
             \hline
-            16   & breaking       \\
+            16   & breaking        \\
             \hline
-            17   & saa            \\
+            17   & saa             \\
             \hline
-            18   & deirezzor      \\
+            18   & deirezzor       \\
             \hline
-            19   & ramadi         \\
+            19   & ramadi          \\
             \hline
-            20   & fallujah       \\
+            20   & fallujah        \\
             \hline
-            21   & homs           \\
+            21   & homs            \\
             \hline
-            22   & iraqi          \\
+            22   & iraqi           \\
             \hline
-            23   & aamaq          \\
+            23   & aamaq           \\
             \hline
-            24   & us             \\
+            24   & us              \\
             \hline
-            25   & khanasir       \\
+            25   & khanasir        \\
             \hline
-            26   & damascus       \\
+            26   & damascus        \\
             \hline
-            27   & fsa            \\
+            27   & fsa             \\
             \hline
-            28   & anbar          \\
+            28   & anbar           \\
             \hline
-            29   & wilayatninawa  \\
+            29   & wilayatninawa   \\
             \hline
-            30   & infographic    \\
+            30   & infographic     \\
             \hline
             31   & caliphate\_news \\
             \hline
-            32   & raqqa          \\
+            32   & raqqa           \\
             \hline
-            33   & sinai          \\
+            33   & sinai           \\
             \hline
-            34   & egypt          \\
+            34   & egypt           \\
             \hline
-            35   & pkk            \\
+            35   & pkk             \\
             \hline
-            36   & twitterkurds   \\
+            36   & twitterkurds    \\
             \hline
-            37   & saudi          \\
+            37   & saudi           \\
             \hline
-            38   & kirkuk         \\
+            38   & kirkuk          \\
             \hline
-            39   & baghdad        \\
+            39   & baghdad         \\
             \hline
-            40   & sirte          \\
+            40   & sirte           \\
             \hline
-            41   & libya          \\
+            41   & libya           \\
             \hline
-            42   & rebels         \\
+            42   & rebels          \\
             \hline
-            43   & sdf            \\
+            43   & sdf             \\
             \hline
-            44   & website        \\
+            44   & website         \\
             \hline
-            45   & cybernews      \\
+            45   & cybernews       \\
             \hline
-            46   & status         \\
+            46   & status          \\
             \hline
-            47   & ankara         \\
+            47   & ankara          \\
             \hline
-            48   & iran           \\
+            48   & iran            \\
             \hline
-            49   & latakia        \\
+            49   & latakia         \\
             \hline
-            50   & syrian         \\
+            50   & syrian          \\
             \hline
-            51   & hama           \\
+            51   & hama            \\
             \hline
-            52   & photoreport    \\
+            52   & photoreport     \\
             \hline
-            53   & daraa          \\
+            53   & daraa           \\
             \hline
-            54   & idlib          \\
+            54   & idlib           \\
             \hline
-            55   & qalamoun       \\
+            55   & qalamoun        \\
             \hline
-            56   & israel         \\
+            56   & israel          \\
             \hline
-            57   & geneva         \\
+            57   & geneva          \\
             \hline
-            58   & hamas          \\
+            58   & hamas           \\
             \hline
-            59   & gaza           \\
+            59   & gaza            \\
             \hline
-            60   & hezbollah      \\
+            60   & hezbollah       \\
             \hline
-            61   & wilayathalab   \\
+            61   & wilayathalab    \\
             \hline
-            62   & shaddadi       \\
+            62   & shaddadi        \\
             \hline
-            63   & jordan         \\
+            63   & jordan          \\
             \hline
             64   & islamic\_state  \\
             \hline
