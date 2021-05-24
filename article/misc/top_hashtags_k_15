@@ -1,0 +1,138 @@
+\begin{table}[ht]
+\begin{tabular} { | c | c | }
+\hline
+Rank & Hashtag \\
+\hline
+1 & isis \\
+\hline
+2 & syria \\
+\hline
+3 & iraq \\
+\hline
+4 & is \\
+\hline
+5 & aleppo \\
+\hline
+6 & islamicstate \\
+\hline
+7 & breakingnews \\
+\hline
+8 & assad \\
+\hline
+9 & ypg \\
+\hline
+10 & turkey \\
+\hline
+11 & palmyra \\
+\hline
+12 & mosul \\
+\hline
+13 & usa \\
+\hline
+14 & russia \\
+\hline
+15 & amaqagency \\
+\hline
+16 & breaking \\
+\hline
+17 & saa \\
+\hline
+18 & deirezzor \\
+\hline
+19 & ramadi \\
+\hline
+20 & fallujah \\
+\hline
+21 & homs \\
+\hline
+22 & iraqi \\
+\hline
+23 & aamaq \\
+\hline
+24 & us \\
+\hline
+25 & khanasir \\
+\hline
+26 & damascus \\
+\hline
+27 & fsa \\
+\hline
+28 & anbar \\
+\hline
+29 & wilayatninawa \\
+\hline
+30 & infographic \\
+\hline
+31 & caliphate_news \\
+\hline
+32 & raqqa \\
+\hline
+33 & sinai \\
+\hline
+34 & egypt \\
+\hline
+35 & pkk \\
+\hline
+36 & twitterkurds \\
+\hline
+37 & saudi \\
+\hline
+38 & kirkuk \\
+\hline
+39 & baghdad \\
+\hline
+40 & sirte \\
+\hline
+41 & libya \\
+\hline
+42 & rebels \\
+\hline
+43 & sdf \\
+\hline
+44 & website \\
+\hline
+45 & cybernews \\
+\hline
+46 & status \\
+\hline
+47 & ankara \\
+\hline
+48 & iran \\
+\hline
+49 & latakia \\
+\hline
+50 & syrian \\
+\hline
+51 & hama \\
+\hline
+52 & photoreport \\
+\hline
+53 & daraa \\
+\hline
+54 & idlib \\
+\hline
+55 & qalamoun \\
+\hline
+56 & israel \\
+\hline
+57 & geneva \\
+\hline
+58 & hamas \\
+\hline
+59 & gaza \\
+\hline
+60 & hezbollah \\
+\hline
+61 & wilayathalab \\
+\hline
+62 & shaddadi \\
+\hline
+63 & jordan \\
+\hline
+64 & islamic_state \\
+\hline
+
+\end{tabular}
+\caption {Ranked hashtags by Degree Centrality when k = 15}
+\label{tab:hashtag-ranks-k-15}
+\end{table*}

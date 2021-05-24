@@ -71,7 +71,10 @@ class TweetData:
 
     def get_mentions(self) -> List[str]:
         """Get list of mentions from single tweet, lowercase"""
-        return list(map(lambda x: x.lower(), re.findall(r"@(\w+)", self.tweet)))
+        if not self.is_retweet():
+            return list(map(lambda x: x.lower(), re.findall(r"@(\w+)", self.tweet)))
+        else:
+            return []
 
     def is_retweet(self) -> bool:
         """Check if tweet starts with RT, remove quotes and whitespaces"""

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# from sklearn.preprocessing import minmax_scale
 import argparse
 import csv
 import logging
@@ -11,6 +10,7 @@ import networkx as nx
 import numpy as np
 import pandas
 import plotly.express as px
+import plotly.graph_objects as go
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 matplotlib.use("Qt5Agg")
@@ -234,23 +234,52 @@ def get_slice(data: Dict, n: int = 10) -> Dict:
     return dict(islice(data.items(), n))
 
 
-def get_graph_info(G: nx.Graph):
-    """Calculate core information of graph"""
-    GLOBAL_LOGGER.info(f"Number of isolates in the pruned graph: {nx.number_of_isolates(G)}")
-    GLOBAL_LOGGER.info(f"There are {G.number_of_nodes()} nodes (unique hashtags) and {G.number_of_edges()}"
+def get_graph_info(G: nx.Graph, k: int = 0):
+    """Calculate core information of the graph"""
+    GLOBAL_LOGGER.info(f"Number of isolates in the graph: {nx.number_of_isolates(G)}")
+    nodes = G.number_of_nodes()
+    edges = G.number_of_edges()
+    GLOBAL_LOGGER.info(f"There are {nodes} nodes (unique hashtags) and {edges}"
                        f" edges in the Graph")
-    degrees = [v for (node, v) in G.degree()]
-    degree_max = np.max(degrees)
-    degree_min = np.min(degrees)
+    # degrees = [v for (node, v) in G.degree()]
+    degrees = sorted(G.degree(), key=lambda x: x[1], reverse=True)
+    degree_max = degrees[0][1]
+    degree_min = degrees[-1][1]
+    deg_mean = round(np.mean([v for (node, v) in degrees]), 2)
     # diameter = nx.diameter(G)
-    average_c_coeff = nx.average_clustering(G)
-
+    average_c_coeff = round(nx.average_clustering(G), 2)
+    average_closeness_cent = round(np.mean(list(map(lambda x: x[1], nx.closeness_centrality(G).items()))), 2)
+    average_betweenness_cent = round(np.mean(list(map(lambda x: x[1], nx.betweenness_centrality(G).items()))), 2)
+    # average_betweenness_cent = np.mean(nx.betweenness_centrality(G))
+    num_conn_comp = nx.number_connected_components(G)
     # Generate sorted list of connected components, the largest at first
     components = [len(c) for c in sorted(nx.connected_components(G), key=len, reverse=True)]
+    GLOBAL_LOGGER.info(f"Top 10 nodes in degree centrality by name:")
+    pathlib.Path("article/misc/").mkdir(parents=True, exist_ok=True)
+    h_file = pathlib.Path(f"article/misc/top_hashtags_k_{k}")
+    with h_file.open("w") as f:
+        start = """\\begin{table}[ht]
+\\begin{tabular} { | c | c | }
+\\hline
+Rank & Hashtag \\\\
+\\hline"""
+        rank = 1
+        print(start, file=f)
+        for node, _ in degrees:
+            print(f"{rank} & {node} \\\\", file=f)
+            print("\\hline", file=f)
+            rank += 1
+        end = f"""
+\\end{{tabular}}
+\\caption {{Ranked hashtags by Degree Centrality when k = {k}}}
+\\label{{tab:hashtag-ranks-k-{k}}}
+\\end{{table}}"""
+        print(end, file=f)
+    GLOBAL_LOGGER.info(f"Ranked nodes in degree centrality by name into file {str(h_file)}")
     GLOBAL_LOGGER.info(f"The maximum degree is {degree_max}")
     GLOBAL_LOGGER.info(f"The minimum degree is {degree_min}")
-    GLOBAL_LOGGER.info(f"The average degree of the nodes is {np.mean(degrees):.2f}")
-    GLOBAL_LOGGER.info(f"The number of connected components is {nx.number_connected_components(G)}")
+    GLOBAL_LOGGER.info(f"The average degree of the nodes is {deg_mean:.2f}")
+    GLOBAL_LOGGER.info(f"The number of connected components is {num_conn_comp}")
     GLOBAL_LOGGER.info(f"The size of the largest component is {components[0]}")
     if nx.is_connected(G):
         diameter = nx.diameter(G)
@@ -263,6 +292,48 @@ def get_graph_info(G: nx.Graph):
             f" created from the biggest component: {diameter}")
 
     GLOBAL_LOGGER.info(f"The average clustering coefficient for the network is {average_c_coeff:.2f}")
+    GLOBAL_LOGGER.info(f"The average closeness centrality for the network is {average_closeness_cent:.2f}")
+    GLOBAL_LOGGER.info(f"The average betweenness centrality for the network is {average_betweenness_cent:.2f}")
+    # Return LaTeX formatted table row
+    return nodes, edges, components, diameter, average_c_coeff, deg_mean, average_closeness_cent, average_betweenness_cent
+
+
+def create_network(data: List[TweetData], k: int = 0) -> nx.Graph:
+    """Create network, limit size by occurrences of tweet hashtag pairs
+    Graph will be undirected - order of hashtag usage does not matter"""
+    pair_occurences = {}
+    edges = []
+    G = nx.Graph()
+    for tweet in data:
+        hashtags = tweet.get_hashtags()
+        if hashtags:
+            # Remove possible duplicates
+            hashtags = set(hashtags)
+            # for tag in hashtags:
+            #     G.add_node(tag)
+            if len(hashtags) > 1:
+                # Make unique pairs from hashtags, marking connection between hashtag
+                combs = list(combinations(hashtags, 2))
+                for comb in combs:
+                    if not pair_occurences.get(comb) and not pair_occurences.get((comb[1], comb[0])):
+                        pair_occurences[comb] = 1
+                    else:
+                        # Swap tuple if it exist already - direction in graph does not matter here
+                        if pair_occurences.get((comb[1], comb[0])):
+                            comb = (comb[1], comb[0])
+                        pair_occurences[comb] += 1
+    # occur_sorted = {str(k): v for k, v in sorted(pair_occurences.items(), key=lambda x: x[1], reverse=True)}
+    # with open("occurrences.json", "w") as f:
+    #     json.dump(occur_sorted, f)
+    # exit()
+    for key, value in pair_occurences.items():
+        if value < k:
+            continue
+        else:
+            edges.append(key)
+    # finally add edges
+    G.add_edges_from(edges)
+    return G
 
 
 def main(_args: argparse.Namespace):
@@ -279,6 +350,22 @@ def main(_args: argparse.Namespace):
     users_sorted = sort_users(users)
     # users_sorted_10 = get_slice(users_sorted)
     # assert 10 == len(users_sorted_10.keys())
+
+    if args.user_hashtags:
+        user_h = users_sorted.get(args.user_hashtags)
+        rankings = {}
+
+        for tweet in user_h.get("tweets"):
+            hashtags = tweet.get_hashtags()
+            for h in hashtags:
+                if not rankings.get(h):
+                    rankings[h] = 1
+                else:
+                    rankings[h] += 1
+        # Top 10 hashtags
+        sorted_ranks = {k: v for (k, v) in sorted(rankings.items(), key=lambda x: x[1], reverse=True)}
+        from pprint import pprint
+        pprint(sorted_ranks)
 
     # Plot all users, by amount of tweets
     if args.all and args.plot_tweets:
@@ -327,7 +414,8 @@ def main(_args: argparse.Namespace):
                 show=args.show
             )
 
-    GLOBAL_LOGGER.info("Plotting sentiments of all tweets...")
+    if args.sentiment:
+        GLOBAL_LOGGER.info("Plotting sentiments of all tweets...")
     if args.sentiment and args.all:
         plot_sentiments_with_ternary(data, args.show)
     elif args.sentiment:
@@ -338,91 +426,113 @@ def main(_args: argparse.Namespace):
             for j in users_sorted_10.keys():
                 users_combined_10 += users_sorted_10.get(j).get("tweets")
             plot_sentiments_with_ternary(users_combined_10, args.show, k)
-    G = nx.Graph()
 
-    create_edge_network = True
-    if create_edge_network:
-        for tweet in data:
-            hashtags = tweet.get_hashtags()
-            if hashtags:
-                # Remove possible duplicates
-                hashtags = set(hashtags)
-                # print(hashtags)
-                for tag in hashtags:
-                    G.add_node(tag)
-                if len(hashtags) > 1:
-                    # Make unique pairs from hashtags, marking connection between hashtag
-                    pairs = list(combinations(hashtags, 2))
-                    G.add_edges_from(pairs)
-        # Reduce network node amount by hashtag occurrences in tweets
-        if args.k:
-            # Remove isolated notes at first
-            isolated = nx.isolates(G)
-            GLOBAL_LOGGER.info("Removing isolates...")
-            G.remove_nodes_from(list(isolated))
-            # Remove nodes based on amount of connections: amount of appearances of tweets with hashtag pairs
-            filter_by = [node for (node, v) in G.degree() if v < int(args.k)]
-            G.remove_nodes_from(filter_by)
-        # Create secondary graph of isolated components, later used for removing isolated components from original graph
-        GLOBAL_LOGGER.debug("All nodes and edges added for hashtag graph")
+    # Reduce network node amount by hashtag occurrences in tweets
+    if args.k and args.create_network:
+        # Collect k and degree centrality value pairs
+        # plotted as heatmap later
+        k_degree = []
+        _table = """\\begin{table*}[ht]
+        \\begin{tabular} { | c | c | c | c | c | c | c | c | c | }
+        \\hline
+        k & Nodes \\# & Edges \\# & Largest component & Diameter & Avg. Clustering Coef. & Avg. Degree & Avg. Closeness & Avg. Betweenness \\\\
+        \\hline"""
+        for _k in args.k:
+            G = create_network(data, int(_k))
+            nodes, edges, components, diameter, average_c_coeff, deg_mean, average_closeness_cent, average_betweenness_cent = get_graph_info(
+                G, _k)
+            k_degree.append((_k, [v for v in G.degree()]))
+            tab_row = f"\t\t{_k} & {nodes} & {edges} & {components[0]} & {diameter} & " \
+                      f"{average_c_coeff} & {deg_mean} & {average_closeness_cent} & {average_betweenness_cent} \\\\"
+            _table += "\n"
+            _table += tab_row + "\n\t\t\\hline"
+
+        _table += """\n
+        \\end{tabular}
+        \\caption {Core measurements of hashtag graph by minimal hashtag pair occurrences (k)}
+        \\label {tab:graphstats-by-k}
+        \\end{table*}"""
+        GLOBAL_LOGGER.info("Following LaTeX table autogenerated:")
+        print(_table)
+        # Example command
+        # python -m analyse -k  1 2 3 4 5 10 15 --show -lDEBUG
+        if args.heatmap:
+            GLOBAL_LOGGER.info("Plotting heatmap of degree centrality based on k values")
+            # degrees = [sorted(map(lambda x: x[1], v), reverse=True) for (k, v) in k_degree]
+            degrees = [list(map(lambda x: x[1], v)) for (k, v) in k_degree]
+            # hashtags = [list(map(lambda x: x[0], v)) for (k, v) in k_degree]
+            fig = go.Figure(data=go.Heatmap(
+                z=degrees,
+                zmax=100,
+                zmin=1,
+                y=[k[0] for k in k_degree],
+                colorscale='Inferno'))
+            path = "article/figures/hashtag_heatmap_by_k.png"
+            fig.write_image(path)
+            if args.show:
+                fig.show()
+
+    elif args.create_network:
+        G = create_network(data)
         get_graph_info(G)
+    GLOBAL_LOGGER.debug("All nodes and edges added for hashtag graph")
+    if args.show:
+        Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
+        pos = nx.spring_layout(Gcc)
+        nx.draw_networkx_nodes(Gcc, pos, node_size=10)
+        nx.draw_networkx_edges(Gcc, pos, alpha=0.4)
+        plt.show()
+
+    if args.page_rank:
+        GLOBAL_LOGGER.info("Creating plot for PageRank.")
+        pr = nx.pagerank_numpy(G, alpha=0.9)
+        # Sort rank of every key-value pair
+        pr_rank = sorted(pr.items(), key=lambda x: x[1], reverse=True)
+        values = [k[1] for k in pr_rank]
+        amount = range(1, len(values) + 1)
+        plt.scatter(amount, values)
+        plt.xlabel("Rank of hashtag")
+        plt.ylabel("PageRank value")
+        plt.title("PageRank distribution of hashtag popularity")
+        for index, item in enumerate(pr_rank[:10]):
+            GLOBAL_LOGGER.info(f"Rank: {index + 1}, hashtag: {item[0]}")
+        plt.savefig(f'article/figures/pagerank_distribution.png', bbox_inches='tight')
         if args.show:
-            Gcc = G.subgraph(sorted(nx.connected_components(G), key=len, reverse=True)[0])
-            pos = nx.spring_layout(Gcc)
-            nx.draw_networkx_nodes(Gcc, pos, node_size=10)
-            nx.draw_networkx_edges(Gcc, pos, alpha=0.4)
             plt.show()
+        else:
+            plt.close()
 
-        if args.page_rank:
-            GLOBAL_LOGGER.info("Creating plot for PageRank.")
-            pr = nx.pagerank_numpy(G, alpha=0.9)
-            # Sort rank of every key-value pair
-            pr_rank = sorted(pr.items(), key=lambda x: x[1], reverse=True)
-            values = [k[1] for k in pr_rank]
-            amount = range(1, len(values) + 1)
-            plt.scatter(amount, values)
-            plt.xlabel("Rank of hashtag")
-            plt.ylabel("PageRank value")
-            plt.title("PageRank distribution of hashtag popularity")
-            for index, item in enumerate(pr_rank[:10]):
-                GLOBAL_LOGGER.info(f"Rank: {index + 1}, hashtag: {item[0]}")
-            plt.savefig(f'article/figures/pagerank_distribution.png', bbox_inches='tight')
-            if args.show:
-                plt.show()
-            else:
-                plt.close()
+    if args.lcc:
+        clusters = nx.clustering(G)
+        plt.hist(clusters.values(), bins=10)
+        plt.title("Distribution of LCC")
+        plt.xlabel('Clustering')
+        plt.ylabel('Frequency')
+        plt.savefig(f'article/figures/lcc_distribution.png', bbox_inches='tight')
+        if args.show:
+            plt.show()
+        else:
+            plt.close()
 
-        if args.lcc:
-            clusters = nx.clustering(G)
-            plt.hist(clusters.values(), bins=10)
-            plt.title("Distribution of LCC")
-            plt.xlabel('Clustering')
-            plt.ylabel('Frequency')
-            plt.savefig(f'article/figures/lcc_distribution.png', bbox_inches='tight')
-            if args.show:
-                plt.show()
-            else:
-                plt.close()
+    if args.girvann:
+        GLOBAL_LOGGER.info(f"Starting Girvan-Newmann analysis.")
+        k = 7
+        comp = nx.algorithms.community.centrality.girvan_newman(G)
+        test = 1
+        for communities in islice(comp, k):
+            data = tuple(sorted(c) for c in communities)
+            print(len(data))
+            # with open(f"file{test}.txt", "w") as f:
+            #     f.write(str(data))
+            # test += 1
+        # with open("file1.new.txt") as f:
+        #     data = json.load(f).get("data")
+        #     GLOBAL_LOGGER.info(f"Amount of communities: {len(data)}")
+        # print(data[0])
+        # Calculate pagerank
 
-        if args.girvann:
-            GLOBAL_LOGGER.info(f"Starting Girvan-Newmann analysis.")
-            k = 1
-            comp = nx.algorithms.community.centrality.girvan_newman(G)
-            test = 1
-            for communities in islice(comp, k):
-                data = tuple(sorted(c) for c in communities)
-                print(len(data))
-                # with open(f"file{test}.txt", "w") as f:
-                #     f.write(str(data))
-                # test += 1
-            # with open("file1.new.txt") as f:
-            #     data = json.load(f).get("data")
-            #     GLOBAL_LOGGER.info(f"Amount of communities: {len(data)}")
-            # print(data[0])
-            # Calculate pagerank
-
-        # nx.drawing.nx_pylab.draw_networkx_nodes(G)
-        # plt.show()
+    # nx.drawing.nx_pylab.draw_networkx_nodes(G)
+    # plt.show()
 
 
 if __name__ == "__main__":
@@ -456,8 +566,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "-k",
         dest="k",
-        help="Reduced graph size by requiring k amount of ",
-        nargs='?',
+        help="Reduce graph size by requiring k amount of tweets with hashtag pairs. Give list of values, e.g. -k 1 2 3 5",
+        nargs='+',
         default=0
     )
     parser.add_argument(
@@ -471,6 +581,25 @@ if __name__ == "__main__":
         dest="sentiment",
         help="Make sentiment analysis for data.",
         action="store_true"
+    )
+    parser.add_argument(
+        "--create-network",
+        dest="create_network",
+        help="Create hashtag network",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--heatmap",
+        dest="heatmap",
+        help="Plot heatmap by occurrences of tweet hashtag pairs.",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--user-hashtags",
+        dest="user_hashtags",
+        help="Show amount of hashtag use by user",
+        nargs='?',
+        default=""
     )
     parser.add_argument(
         "--lcc",
