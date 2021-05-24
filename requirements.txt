@@ -8,3 +8,6 @@ pytest
 numpy
 powerlaw
 psutil
+pyqt5
+plotly
+plotly-orca

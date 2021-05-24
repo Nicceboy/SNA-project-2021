@@ -65,6 +65,31 @@ Currently main function code can be run as:
 ```console
 python -m analyse
 ```
+With following options:
+```console
+usage: __main__.py [-h] [-l {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [-a] [-s] [-k K [K ...]] [--plot-tweets]
+                   [--sentiment] [--create-network] [--heatmap] [--user-hashtags [USER_HASHTAGS]] [--lcc]
+                   [--page-rank] [--girvann]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}, --log {DEBUG,INFO,WARNING,ERROR,CRITICAL}
+                        Set the logging level (default: None)
+  -a, --all             Provided when showcasing all of the user data. By default top10 used instead. Some user
+                        specific data left out (default: False)
+  -s, --show            Additionally show plots on GUI instead only saving them as file. (default: False)
+  -k K [K ...]          Reduce graph size by requiring k amount of tweets with hashtag pairs. Give list of values,
+                        e.g. -k 1 2 3 5 (default: 0)
+  --plot-tweets         Plot tweets (default: False)
+  --sentiment           Make sentiment analysis for data. (default: False)
+  --create-network      Create hashtag network (default: False)
+  --heatmap             Plot heatmap by occurrences of tweet hashtag pairs. (default: False)
+  --user-hashtags [USER_HASHTAGS]
+                        Show amount of hashtag use by user (default: )
+  --lcc                 Make Local Clustering Coefficient distribution plot for hashtag network (default: False)
+  --page-rank           Make and plot PageRank distribution. (default: False)
+  --girvann             Make Girvan-Newman analysis to find communities from the network. (default: False)
+```
 
 ## Tests
 

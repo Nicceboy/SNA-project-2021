@@ -362,10 +362,10 @@ def main(_args: argparse.Namespace):
                     rankings[h] = 1
                 else:
                     rankings[h] += 1
-        # Top 10 hashtags
-        sorted_ranks = {k: v for (k, v) in sorted(rankings.items(), key=lambda x: x[1], reverse=True)}
+        # Top 10 hashtags by selected user
+        sorted_ranks = {k: v for (k, v) in sorted(rankings.items(), key=lambda x: x[1], reverse=True)[:10]}
         from pprint import pprint
-        pprint(sorted_ranks)
+        pprint(sorted_ranks, sort_dicts=False)
 
     # Plot all users, by amount of tweets
     if args.all and args.plot_tweets:
